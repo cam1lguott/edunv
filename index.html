@@ -2,10 +2,1482 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EDUNV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Hold the Line</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --card-dark: #111726;
+      --card-border: #1e293b;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #171b2f 0%, #0a0d14 60%, #05070a 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    .mono { font-family: 'Space Grotesk', monospace; }
+
+    /* Keyframe Animations */
+    @keyframes charSlideInLeft {
+      0% { transform: translateX(-140%) scale(0.7) rotate(-8deg); opacity: 0; }
+      60% { transform: translateX(8%) scale(1.05) rotate(2deg); opacity: 1; }
+      85% { transform: translateX(-3%) scale(0.98) rotate(-1deg); }
+      100% { transform: translateX(0) scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes charSlideInRight {
+      0% { transform: translateX(140%) scale(0.7) rotate(8deg); opacity: 0; }
+      60% { transform: translateX(-8%) scale(1.05) rotate(-2deg); opacity: 1; }
+      85% { transform: translateX(3%) scale(0.98) rotate(1deg); }
+      100% { transform: translateX(0) scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes charSlideOutLeft {
+      0% { transform: translateX(0) scale(1); opacity: 1; }
+      100% { transform: translateX(-140%) scale(0.8) rotate(-6deg); opacity: 0; }
+    }
+
+    @keyframes charSlideOutRight {
+      0% { transform: translateX(0) scale(1); opacity: 1; }
+      100% { transform: translateX(140%) scale(0.8) rotate(6deg); opacity: 0; }
+    }
+
+    @keyframes charIdleBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes charTalkBob {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-3.5px) rotate(-1.5deg); }
+      75% { transform: translateY(-1.5px) rotate(1.5deg); }
+    }
+
+    @keyframes eyeBlink {
+      0%, 94%, 100% { transform: scaleY(1); }
+      97% { transform: scaleY(0.1); }
+    }
+
+    @keyframes bubblePopInAnim {
+      0% { transform: translateY(18px) scale(0.8); opacity: 0; }
+      65% { transform: translateY(-4px) scale(1.03); opacity: 1; }
+      85% { transform: translateY(2px) scale(0.98); }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes bubblePopOutAnim {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-16px) scale(0.85); opacity: 0; }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
+      50% { box-shadow: 0 0 28px rgba(245, 158, 11, 0.5); }
+    }
+
+    @keyframes cardFadeUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Animation Classes */
+    .anim-enter-left { animation: charSlideInLeft 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .anim-enter-right { animation: charSlideInRight 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .anim-exit-left { animation: charSlideOutLeft 0.35s ease-in forwards; }
+    .anim-exit-right { animation: charSlideOutRight 0.35s ease-in forwards; }
+    .anim-idle { animation: charIdleBob 2.8s ease-in-out infinite; }
+    .anim-talking { animation: charTalkBob 0.6s ease-in-out infinite; }
+    .anim-fade-up { animation: cardFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    .eye-blink-elem { transform-origin: 50% 50%; animation: eyeBlink 3.8s ease-in-out infinite; }
+    .mouth-talk-elem { transform-origin: 50% 50%; animation: mouthTalkAnim 0.3s ease-in-out infinite; }
+
+    /* Speech Bubble Styles */
+    .speech-bubble {
+      position: relative;
+      background: rgba(17, 24, 39, 0.96);
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      border-radius: 22px;
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.75), 0 0 25px rgba(245, 158, 11, 0.12);
+      backdrop-filter: blur(14px);
+      padding: 15px 16px;
+      transition: all 0.25s ease;
+      animation: bubblePopInAnim 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .speech-bubble.bubble-pointer-left::after {
+      content: '';
+      position: absolute;
+      bottom: -9px;
+      left: 36px;
+      width: 18px;
+      height: 18px;
+      background: rgba(17, 24, 39, 0.96);
+      border-right: 2px solid rgba(255, 255, 255, 0.14);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.14);
+      transform: rotate(45deg);
+    }
+
+    .speech-bubble.bubble-pointer-right::after {
+      content: '';
+      position: absolute;
+      bottom: -9px;
+      right: 36px;
+      width: 18px;
+      height: 18px;
+      background: rgba(17, 24, 39, 0.96);
+      border-right: 2px solid rgba(255, 255, 255, 0.14);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.14);
+      transform: rotate(45deg);
+    }
+
+    .speech-bubble.bubble-leaving {
+      animation: bubblePopOutAnim 0.22s ease-in forwards;
+    }
+
+    /* Word Grid Styles */
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 6px;
+      touch-action: none;
+    }
+
+    .grid-cell {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.15rem;
+      border-radius: 10px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
 </head>
-<body>
-  <h1>EDUNV</h1>
+<body class="min-h-screen text-slate-100 flex flex-col items-center pb-10">
+
+  <!-- STUDENT IDENTIFICATION -->
+  <div id="studentStartScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 px-5 backdrop-blur-sm">
+    <div class="w-full max-w-[390px] bg-slate-900 text-white p-5 rounded-3xl border-2 border-slate-800 shadow-2xl">
+      <span class="text-[10px] font-black uppercase tracking-wider text-amber-300">HOLD THE LINE</span>
+      <h2 class="text-2xl font-black mt-1 mb-2">Antes de comenzar</h2>
+      <p class="text-sm text-slate-300 mb-4">Escribe tu nombre y apellido para registrar tu nota.</p>
+      <label for="studentName" class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Nombre y apellido</label>
+      <input id="studentName" type="text" autocomplete="name" placeholder="Ej. María González" class="w-full bg-slate-950 text-white border-2 border-slate-700 focus:border-amber-400 outline-none rounded-2xl px-4 py-3 text-sm font-semibold mb-3">
+      <p id="studentNameError" class="hidden text-xs text-rose-300 font-semibold mb-3">Escribe tu nombre y apellido para continuar.</p>
+      <button onclick="startActivity()" class="w-full bg-amber-400 hover:bg-amber-300 text-black font-black py-3.5 rounded-2xl uppercase tracking-wider text-sm transition-all shadow-lg shadow-amber-400/20 active:scale-95">Comenzar actividad</button>
+    </div>
+  </div>
+
+  <!-- Main Mobile-First Portrait Container -->
+  <div class="w-full max-w-[430px] px-3.5 pt-3 flex flex-col min-h-screen">
+
+    <!-- Top App Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md text-white p-3.5 rounded-3xl border border-slate-800 shadow-xl mb-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] font-black text-amber-300 tracking-wider">1.4</span>
+          </div>
+          <h1 class="text-base font-black leading-tight tracking-tight text-white">HOLD THE LINE</h1>
+        </div>
+      </div>
+      <div class="bg-slate-950/80 px-3.5 py-1.5 rounded-2xl border border-slate-800 text-right">
+        <span class="text-[9px] uppercase text-slate-400 font-bold block tracking-wider">Nota Actual</span>
+        <span id="headerScore" class="text-xl font-black text-emerald-400 mono">0.0</span>
+      </div>
+    </header>
+
+    <!-- FASE 1: LECCIONES CON PERSONAJES ANIMADOS Y RETOS -->
+    <main id="learningPhase" class="flex-1 flex flex-col">
+
+      <!-- Module Meta Header -->
+      <div class="flex items-center justify-between px-1.5 mb-2.5">
+        <span id="moduleBadge" class="bg-slate-900 text-amber-400 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border border-slate-800 shadow-sm">
+          Módulo 1 de 10
+        </span>
+      </div>
+
+      <!-- THE ANIMATED STAGE CARD (Characters & Floating Message) -->
+      <div class="relative">
+        <button id="modulePrevBtn" onclick="previousModule()" aria-label="Módulo anterior" title="Módulo anterior" class="absolute -left-14 top-1/2 z-30 -translate-y-1/2 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-amber-300 font-black text-xl w-10 h-10 rounded-full border border-slate-700 shadow-lg shadow-black/30 flex items-center justify-center transition-all active:scale-95">
+          ←
+        </button>
+        <button id="moduleNextBtn" onclick="nextModuleFromSide()" aria-label="Siguiente módulo" title="Siguiente módulo" class="absolute -right-14 top-1/2 z-30 -translate-y-1/2 bg-amber-400 hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed text-black font-black text-xl w-10 h-10 rounded-full shadow-lg shadow-amber-400/20 flex items-center justify-center transition-all active:scale-95">
+          →
+        </button>
+
+      <div id="stageCard" class="relative bg-gradient-to-b from-slate-900 via-slate-950 to-black rounded-3xl border-2 border-slate-800 shadow-2xl p-4 flex flex-col justify-between overflow-hidden mb-3.5 min-h-[360px]">
+        
+        <!-- Story Progress Bars (Instagram / Stories Style) -->
+        <div id="storyProgressBars" class="flex gap-1.5 w-full mb-2.5">
+          <!-- Filled dynamically in JS -->
+        </div>
+
+        <!-- Scene Context Header -->
+        <div class="flex items-center justify-between mb-1.5 z-10">
+          <div class="flex items-center gap-2">
+            <span id="sceneIconBadge" class="text-sm bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-700">🚖</span>
+            <span id="sceneTitleText" class="text-xs font-black uppercase text-amber-300 tracking-wide">Situación en Vivo</span>
+          </div>
+          <span id="beatCounter" class="text-[11px] font-bold text-slate-400 mono">Paso 1/3</span>
+        </div>
+
+        <!-- FLOATING SPEECH BUBBLE AREA (Appears directly above characters) -->
+        <div id="bubbleContainer" class="relative z-20 min-h-[145px] flex flex-col justify-center my-1">
+          <!-- Speech bubble rendered dynamically here -->
+        </div>
+
+        <!-- CHARACTERS STAGE FLOOR -->
+        <div class="relative w-full h-[155px] flex items-end justify-between px-2 pt-1 z-10">
+          <!-- Floor glowing shadow -->
+          <div class="absolute bottom-0 left-4 right-4 h-2 bg-gradient-to-r from-transparent via-amber-500/25 to-transparent blur-sm rounded-full pointer-events-none"></div>
+
+          <!-- Character Left Slot -->
+          <div id="charLeftSlot" class="w-[140px] h-[155px] relative flex items-end justify-center transition-all duration-300">
+            <!-- Left character SVG -->
+          </div>
+
+          <!-- Stage Center Sparkle / FX Area -->
+          <div id="stageFxArea" class="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <!-- Sparkles and celebration elements injected here -->
+          </div>
+
+          <!-- Character Right Slot -->
+          <div id="charRightSlot" class="w-[140px] h-[155px] relative flex items-end justify-center transition-all duration-300">
+            <!-- Right character SVG -->
+          </div>
+        </div>
+
+        <!-- Bottom Stage Controls -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 mt-1 z-10">
+          <button id="stagePrevBtn" onclick="previousDialogueBeat()" aria-label="Diálogo anterior" title="Diálogo anterior" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-amber-300 font-black text-lg w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95">
+            ←
+          </button>
+          <span class="text-[11px] text-slate-400 font-medium">Usa las flechas para navegar</span>
+          <button id="stageNextBtn" onclick="nextDialogueBeat()" aria-label="Siguiente diálogo" title="Siguiente diálogo" class="bg-amber-400 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 text-black font-black text-lg w-9 h-9 rounded-full flex items-center justify-center shadow-md shadow-amber-400/20 transition-all">
+            →
+          </button>
+        </div>
+
+      </div>
+      </div>
+
+      <!-- CHALLENGE CARD (Interactive Quiz Question) -->
+      <div id="challengeCard" class="hidden bg-slate-900/95 backdrop-blur-md rounded-3xl border-2 border-slate-800 shadow-2xl p-4 mb-4 anim-fade-up">
+        
+        <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2.5">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span class="text-xs font-black uppercase text-white tracking-wide">Tu Turno de Responder</span>
+          </div>
+        </div>
+
+        <p id="challengeContext" class="text-xs text-slate-300 font-medium mb-2.5 leading-relaxed"></p>
+
+        <!-- Sentence Display Box -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 mb-3.5 relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 text-4xl opacity-10">💬</div>
+          <h3 id="challengeSentence" class="text-sm font-black leading-snug text-white mono"></h3>
+        </div>
+
+        <!-- Options Container -->
+        <div id="optionsContainer" class="space-y-2">
+          <!-- Option buttons inserted here -->
+        </div>
+
+        <!-- Feedback Box -->
+        <div id="feedbackBox" class="mt-3.5 p-3 rounded-2xl hidden">
+          <p id="feedbackText" class="text-xs font-semibold leading-relaxed"></p>
+        </div>
+
+        <!-- Next Module Button -->
+        <button id="nextModuleBtn" onclick="nextModule()" class="w-full mt-3.5 bg-amber-400 hover:bg-amber-300 text-black font-black py-3.5 rounded-2xl uppercase tracking-wider text-xs transition-all hidden shadow-lg shadow-amber-400/25 active:scale-95 flex items-center justify-center gap-1.5">
+          <span>Siguiente Lección</span>
+          <span class="text-sm font-black">➔</span>
+        </button>
+
+      </div>
+
+    </main>
+
+    <!-- FASE 2: SOPA DE LETRAS TÁCTIL (TOUCH-SWIPE) -->
+    <div id="wordsearchPhase" class="hidden flex-1 flex flex-col anim-fade-up">
+      <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-2xl border border-slate-800 mb-3 text-center">
+        <div class="flex items-center justify-between mb-2">
+          <span id="wordProgressBadge" class="bg-amber-400 text-black text-xs font-black px-3 py-1 rounded-full uppercase">Palabra 1 de 5</span>
+          <span class="text-xs text-emerald-400 font-bold">Desliza con el dedo 👆</span>
+        </div>
+        
+        <p class="text-xs text-slate-400 uppercase font-semibold mt-1">Busca y encierra en la sopa:</p>
+        <div class="flex items-center justify-center gap-2 my-2">
+          <h2 id="targetWordDisplay" class="text-2xl font-black text-amber-400 tracking-widest mono bg-slate-950 px-5 py-2 rounded-2xl border border-slate-800">PHONE</h2>
+        </div>
+        <p id="targetWordClue" class="text-xs text-slate-300 font-medium px-2"></p>
+
+        <div id="foundBadgesContainer" class="flex flex-wrap gap-1.5 justify-center mt-3 pt-2.5 border-t border-slate-800"></div>
+      </div>
+
+      <div class="bg-slate-900 p-3 rounded-3xl shadow-2xl border border-slate-800 mb-4">
+        <div id="gridContainer" class="word-grid bg-slate-950 p-2 rounded-2xl border border-slate-800/80"></div>
+      </div>
+    </div>
+
+    <!-- FASE 3: RESULTADOS CON NOTA DE 0.0 A 5.0 -->
+    <div id="resultPhase" class="hidden flex-1 flex flex-col justify-center anim-fade-up">
+      <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-2xl border border-slate-800 text-center">
+        <span class="bg-emerald-400 text-black text-xs font-black px-3.5 py-1 rounded-full uppercase">Evaluación Finalizada</span>
+        <h2 class="text-2xl font-black mt-3 mb-1">¡Desempeño Completo!</h2>
+        <p class="text-xs text-slate-300">Completaste las 10 lecciones animadas y superaste la sopa de letras.</p>
+
+        <div class="my-5 bg-slate-950 p-5 rounded-3xl border-2 border-slate-800 inline-block w-full">
+          <span class="text-xs uppercase text-slate-400 font-bold block mb-1">Estudiante</span>
+          <div id="finalStudentName" class="text-xl font-black text-white mb-4">Nombre del estudiante</div>
+          <span class="text-xs uppercase text-slate-400 font-bold block mb-1">Nota Definitiva</span>
+          <div id="finalGrade" class="text-5xl font-black text-emerald-400 mono">5.0</div>
+          <span id="gradeCategory" class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Desempeño Superior</span>
+        </div>
+
+        <button onclick="location.reload()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 rounded-2xl uppercase tracking-wider text-xs transition-all">
+          Reiniciar Actividad
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ==========================================================================
+       2. CHARACTER PROFILES & SVG AVATAR GENERATOR
+       ========================================================================== */
+    const CHARACTER_PROFILES = {
+      santiago: {
+        name: "Santiago",
+        gender: "m",
+        hairStyle: "short",
+        skin: "#F5C29B",
+        hairColor: "#2D1810",
+        outfitColor: "#2563EB",
+        themeColor: "#3B82F6",
+        emoji: "🙋‍♂️"
+      },
+      elena: {
+        name: "Elena",
+        gender: "f",
+        hairStyle: "ponytail",
+        skin: "#FCD5B5",
+        hairColor: "#1E140A",
+        outfitColor: "#059669",
+        themeColor: "#10B981",
+        accessory: "glasses",
+        emoji: "👓"
+      },
+      camilo: {
+        name: "Camilo",
+        gender: "m",
+        hairStyle: "curls",
+        skin: "#F3BE98",
+        hairColor: "#1F1612",
+        outfitColor: "#7C3AED",
+        themeColor: "#8B5CF6",
+        accessory: "headphones",
+        emoji: "🎧"
+      },
+      valeria: {
+        name: "Valeria",
+        gender: "f",
+        hairStyle: "headband",
+        skin: "#FDE2C6",
+        hairColor: "#D97706",
+        outfitColor: "#D97706",
+        themeColor: "#F59E0B",
+        emoji: "⭐"
+      },
+      andres: {
+        name: "Andrés",
+        gender: "m",
+        hairStyle: "fade",
+        skin: "#E2AA7D",
+        hairColor: "#1A1A1A",
+        outfitColor: "#0284C7",
+        themeColor: "#0284C7",
+        accessory: "badge",
+        emoji: "🏥"
+      },
+      sofia: {
+        name: "Sofía",
+        gender: "f",
+        hairStyle: "bob",
+        skin: "#FAD0AF",
+        hairColor: "#1C140E",
+        outfitColor: "#1E3A8A",
+        themeColor: "#3B82F6",
+        emoji: "✨"
+      },
+      martin: {
+        name: "Martín",
+        gender: "m",
+        hairStyle: "spiky",
+        skin: "#F5BD93",
+        hairColor: "#3E1E04",
+        outfitColor: "#DC2626",
+        themeColor: "#EF4444",
+        accessory: "phone",
+        emoji: "📱"
+      },
+      lucia: {
+        name: "Lucía",
+        gender: "f",
+        hairStyle: "bun",
+        skin: "#FCE1C5",
+        hairColor: "#2B1608",
+        outfitColor: "#0891B2",
+        themeColor: "#06B6D4",
+        emoji: "💡"
+      },
+      felipe: {
+        name: "Felipe",
+        gender: "m",
+        hairStyle: "short",
+        skin: "#E5AF81",
+        hairColor: "#171717",
+        outfitColor: "#2563EB",
+        themeColor: "#2563EB",
+        accessory: "phone",
+        emoji: "📞"
+      },
+      diana: {
+        name: "Diana",
+        gender: "f",
+        hairStyle: "waves",
+        skin: "#F8CDAF",
+        hairColor: "#6B2807",
+        outfitColor: "#DB2777",
+        themeColor: "#EC4899",
+        accessory: "headset",
+        emoji: "🎧"
+      },
+      javier: {
+        name: "Javier",
+        gender: "m",
+        hairStyle: "messy",
+        skin: "#F6C4A1",
+        hairColor: "#301D11",
+        outfitColor: "#16A34A",
+        themeColor: "#16A34A",
+        emoji: "🎒"
+      },
+      profesora: {
+        name: "Profesora",
+        gender: "f",
+        hairStyle: "teacher",
+        skin: "#FCD9BC",
+        hairColor: "#334155",
+        outfitColor: "#9333EA",
+        themeColor: "#A855F7",
+        accessory: "cat_glasses",
+        emoji: "👩‍🏫"
+      },
+      gabriela: {
+        name: "Gabriela",
+        gender: "f",
+        hairStyle: "sleek",
+        skin: "#EBB48C",
+        hairColor: "#141414",
+        outfitColor: "#6B21A8",
+        themeColor: "#8B5CF6",
+        emoji: "💼"
+      },
+      operador: {
+        name: "Operador",
+        gender: "m",
+        hairStyle: "part",
+        skin: "#DFA074",
+        hairColor: "#222222",
+        outfitColor: "#0891B2",
+        themeColor: "#06B6D4",
+        accessory: "headset",
+        emoji: "📟"
+      },
+      oscar: {
+        name: "Óscar",
+        gender: "m",
+        hairStyle: "textured",
+        skin: "#F4B889",
+        hairColor: "#26170E",
+        outfitColor: "#4D7C0F",
+        themeColor: "#84CC16",
+        emoji: "📝"
+      },
+      mariana: {
+        name: "Mariana",
+        gender: "f",
+        hairStyle: "layered",
+        skin: "#F9D4B3",
+        hairColor: "#B45309",
+        outfitColor: "#B45309",
+        themeColor: "#F59E0B",
+        emoji: "📋"
+      },
+      esteban: {
+        name: "Esteban",
+        gender: "m",
+        hairStyle: "taper",
+        skin: "#E0A878",
+        hairColor: "#18181B",
+        outfitColor: "#4B5563",
+        themeColor: "#94A3B8",
+        emoji: "🤝"
+      },
+      sara: {
+        name: "Sara",
+        gender: "f",
+        hairStyle: "dark_waves",
+        skin: "#F7CCA7",
+        hairColor: "#24130A",
+        outfitColor: "#047857",
+        themeColor: "#10B981",
+        emoji: "🌸"
+      },
+      mateo: {
+        name: "Mateo",
+        gender: "m",
+        hairStyle: "quick",
+        skin: "#F3B78B",
+        hairColor: "#251711",
+        outfitColor: "#EA580C",
+        themeColor: "#F97316",
+        accessory: "phone",
+        emoji: "⚡"
+      },
+      natalia: {
+        name: "Natalia",
+        gender: "f",
+        hairStyle: "straight",
+        skin: "#FBD1AF",
+        hairColor: "#18181B",
+        outfitColor: "#1D4ED8",
+        themeColor: "#3B82F6",
+        accessory: "headset",
+        emoji: "🌟"
+      }
+    };
+
+    function renderCharacterSVG(charKey, isSpeaking, emotion) {
+      const p = CHARACTER_PROFILES[charKey] || CHARACTER_PROFILES.santiago;
+      
+      // Hair markup with clean, realistic, handsome illustration style
+      let hairMarkup = '';
+      if (p.hairStyle === 'cap' || charKey === 'santiago') {
+        // Santiago: Normal handsome short haircut, no weird mask
+        hairMarkup = `
+          <!-- Hair base -->
+          <path d="M 40 75 Q 40 46 70 46 Q 100 46 100 75 Q 96 60 70 58 Q 44 60 40 75 Z" fill="${p.hairColor}" />
+          <!-- Stylish sideburns & fringe -->
+          <path d="M 40 70 Q 42 82 45 84 Q 48 76 48 68 Z" fill="${p.hairColor}" />
+          <path d="M 100 70 Q 98 82 95 84 Q 92 76 92 68 Z" fill="${p.hairColor}" />
+          <path d="M 46 62 Q 60 58 72 64 Q 60 56 46 62 Z" fill="${p.hairColor}" />
+        `;
+      } else if (p.hairStyle === 'ponytail') {
+        hairMarkup = `
+          <!-- Ponytail flowing back -->
+          <path d="M 94 65 Q 118 68 112 94 Q 100 88 92 78 Z" fill="${p.hairColor}" />
+          <!-- Head hair -->
+          <path d="M 40 76 Q 40 48 70 48 Q 100 48 100 76 Q 94 58 70 58 Q 46 58 40 76 Z" fill="${p.hairColor}" />
+          <!-- Hair tie -->
+          <circle cx="95" cy="68" r="4.5" fill="#10B981" />
+        `;
+      } else if (p.hairStyle === 'curls') {
+        hairMarkup = `
+          <!-- Natural textured curls -->
+          <path d="M 38 75 Q 36 50 68 46 Q 102 50 102 75 Q 96 58 70 56 Q 44 58 38 75 Z" fill="${p.hairColor}" />
+          <circle cx="48" cy="54" r="8" fill="${p.hairColor}" />
+          <circle cx="64" cy="48" r="9" fill="${p.hairColor}" />
+          <circle cx="80" cy="48" r="9" fill="${p.hairColor}" />
+          <circle cx="94" cy="54" r="8" fill="${p.hairColor}" />
+        `;
+      } else if (p.hairStyle === 'bob' || p.hairStyle === 'layered') {
+        hairMarkup = `
+          <path d="M 38 74 Q 40 48 70 48 Q 100 48 102 74 Q 104 94 96 98 Q 96 78 92 68 Q 70 60 48 68 Q 44 78 44 98 Q 36 94 38 74 Z" fill="${p.hairColor}" />
+        `;
+      } else if (p.hairStyle === 'bun' || p.hairStyle === 'teacher') {
+        hairMarkup = `
+          <ellipse cx="70" cy="40" rx="14" ry="12" fill="${p.hairColor}" />
+          <path d="M 40 75 Q 40 50 70 50 Q 100 50 100 75 Q 92 58 70 58 Q 48 58 40 75 Z" fill="${p.hairColor}" />
+        `;
+      } else {
+        // Standard clean modern fade / short cut
+        hairMarkup = `
+          <path d="M 40 74 Q 40 48 70 48 Q 100 48 100 74 Q 94 58 70 56 Q 46 58 40 74 Z" fill="${p.hairColor}" />
+          <path d="M 40 72 Q 42 82 45 84 Q 48 76 48 68 Z" fill="${p.hairColor}" />
+          <path d="M 100 72 Q 98 82 95 84 Q 92 76 92 68 Z" fill="${p.hairColor}" />
+        `;
+      }
+
+      // Accessories
+      let accessoryMarkup = '';
+      if (p.accessory === 'glasses' || p.accessory === 'cat_glasses') {
+        accessoryMarkup = `
+          <g stroke="${p.accessory === 'cat_glasses' ? '#A855F7' : '#0D9488'}" stroke-width="2.5" fill="none">
+            <circle cx="58" cy="80" r="8.5" />
+            <circle cx="82" cy="80" r="8.5" />
+            <line x1="66.5" y1="80" x2="73.5" y2="80" />
+          </g>
+        `;
+      } else if (p.accessory === 'headset') {
+        accessoryMarkup = `
+          <!-- Headset band -->
+          <path d="M 40 76 Q 70 38 100 76" stroke="#0F172A" stroke-width="3.5" fill="none" />
+          <!-- Earpad -->
+          <rect x="36" y="70" width="7" height="15" rx="3.5" fill="#0F172A" />
+          <!-- Mic boom curving to mouth -->
+          <path d="M 40 82 Q 45 98 62 96" stroke="#0F172A" stroke-width="2" fill="none" />
+          <circle cx="62" cy="96" r="2.5" fill="#10B981" />
+        `;
+      } else if (p.accessory === 'headphones') {
+        accessoryMarkup = `
+          <!-- Headphones around neck -->
+          <path d="M 46 114 Q 70 126 94 114" stroke="#4F46E5" stroke-width="5" fill="none" stroke-linecap="round" />
+          <rect x="42" y="104" width="9" height="15" rx="4" fill="#4338CA" />
+          <rect x="89" y="104" width="9" height="15" rx="4" fill="#4338CA" />
+        `;
+      } else if (p.accessory === 'phone') {
+        accessoryMarkup = `
+          <g transform="translate(94, 76)">
+            <rect x="0" y="0" width="10" height="20" rx="3" fill="#0F172A" stroke="#334155" stroke-width="1" />
+            <rect x="2" y="3" width="6" height="12" rx="1" fill="#38BDF8" opacity="0.85" />
+          </g>
+        `;
+      } else if (p.accessory === 'badge') {
+        accessoryMarkup = `
+          <rect x="74" y="126" width="10" height="13" rx="2" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" />
+          <circle cx="79" cy="129" r="1.5" fill="#0284C7" />
+          <line x1="76" y1="133" x2="82" y2="133" stroke="#94A3B8" stroke-width="1" />
+        `;
+      }
+
+      // Eyes markup: Normal, natural looking human eyes
+      let eyesMarkup = `
+        <g class="eye-blink-elem">
+          <circle cx="58" cy="80" r="3.6" fill="#1E293B" />
+          <circle cx="59.5" cy="78.5" r="1.2" fill="#ffffff" />
+          <circle cx="82" cy="80" r="3.6" fill="#1E293B" />
+          <circle cx="83.5" cy="78.5" r="1.2" fill="#ffffff" />
+        </g>
+      `;
+
+      // Mouth markup: Natural, fixed human smile/expression (no mouth movement)
+      let mouthMarkup = `
+        <path d="M 64 94 Q 70 99 76 94" stroke="#1E293B" stroke-width="2" fill="none" stroke-linecap="round" />
+      `;
+
+      return `
+        <svg viewBox="0 0 140 180" class="w-full h-full filter drop-shadow-md select-none">
+          <!-- Floor shadow -->
+          <ellipse cx="70" cy="170" rx="36" ry="7" fill="rgba(0,0,0,0.4)" />
+
+          <!-- Character Body / Outfit -->
+          <path d="M 32 170 Q 30 126 50 116 L 90 116 Q 110 126 108 170 Z" fill="${p.outfitColor}" />
+          
+          <!-- Outfit Collar / Details -->
+          <path d="M 58 116 L 70 130 L 82 116 Z" fill="#ffffff" opacity="0.9" />
+          <path d="M 70 130 L 70 168" stroke="rgba(0,0,0,0.2)" stroke-width="2" stroke-linecap="round" />
+
+          <!-- Neck -->
+          <rect x="62" y="100" width="16" height="18" rx="4" fill="${p.skin}" />
+
+          <!-- Head (Clean natural face) -->
+          <ellipse cx="70" cy="82" rx="28" ry="32" fill="${p.skin}" />
+
+          <!-- Cheeks blush (subtle) -->
+          <ellipse cx="51" cy="90" rx="4" ry="2" fill="#F43F5E" opacity="0.2" />
+          <ellipse cx="89" cy="90" rx="4" ry="2" fill="#F43F5E" opacity="0.2" />
+
+          <!-- Hair (Drawn on top of the head) -->
+          ${hairMarkup}
+
+          <!-- Eyebrows -->
+          <path d="M 52 72 Q 58 69 64 72" stroke="${p.hairColor}" stroke-width="2" fill="none" stroke-linecap="round" />
+          <path d="M 76 72 Q 82 69 88 72" stroke="${p.hairColor}" stroke-width="2" fill="none" stroke-linecap="round" />
+
+          <!-- Eyes -->
+          ${eyesMarkup}
+
+          <!-- Nose -->
+          <circle cx="70" cy="87" r="1.5" fill="#D97706" opacity="0.4" />
+
+          <!-- Mouth -->
+          ${mouthMarkup}
+
+          <!-- Accessories (Glasses / Headset / Phone) -->
+          ${accessoryMarkup}
+
+        </svg>
+      `;
+    }
+
+    /* ==========================================================================
+       3. 10 COMPLETE MODULES (DIALOGUES, RULES, CHALLENGES)
+       ========================================================================== */
+    const modules = [
+      {
+        sceneIcon: "🚖",
+        sceneTitle: "1. En el Taxi / Uber",
+        charLeftKey: "santiago",
+        charRightKey: "elena",
+        dialogues: [
+          { speaker: "Santiago", charKey: "santiago", text: "Turn on the air conditioner right now, driver!", isError: true, note: "Muy mandón y grosero" },
+          { speaker: "Elena", charKey: "elena", text: "¡Santiago, no le hables así al chofer! Eso suena feo. Mejor pídelo con calma: 'Could you please turn on the AC?'", isCorrection: true },
+          { speaker: "Santiago", charKey: "santiago", text: "¡Ah, claro! Con 'Could you please' uno pide el favor con buena educación.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Para pedir un favor o servicio con amabilidad y sin mandar a nadie, di: <strong>'Could you please + verbo'</strong>.",
+        challenge: {
+          context: "Situación real: Estás en el mostrador del aeropuerto y le pides al agente que verifique el peso de tu maleta:",
+          sentence: "Excuse me, sir. ______ you please weigh my suitcase?",
+          speak: "Excuse me sir. Could you please weigh my suitcase?",
+          options: ["Could", "Weigh", "Do"],
+          correct: 0,
+          feedback: "¡Así es! 'Could you please weigh...' es la forma educada y correcta de pedir el favor."
+        }
+      },
+      {
+        sceneIcon: "📚",
+        sceneTitle: "2. Pedir que NO hagan algo",
+        charLeftKey: "camilo",
+        charRightKey: "valeria",
+        dialogues: [
+          { speaker: "Camilo", charKey: "camilo", text: "(Golpea la mesa ruidosamente con un lápiz mientras estudian)", isError: true, note: "Haciendo bulla molesta" },
+          { speaker: "Valeria", charKey: "valeria", text: "Camilo, would you mind NOT making that noise, please?", isCorrection: true },
+          { speaker: "Camilo", charKey: "camilo", text: "¿Se puede meter el 'not' ahí? ¡No me la sabía!", isFinal: false },
+          { speaker: "Valeria", charKey: "valeria", text: "¡Claro! Dices: 'Would you mind not + verbo en -ING' para pedirle a alguien que no haga algo incómodo.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Para pedir que dejen de hacer algo molesto: <strong>Would you mind not + verbo con -ING</strong>.",
+        challenge: {
+          context: "Situación real: Tu compañero de cuarto deja los zapatos mojados y con barro en el pasillo común. ¿Cómo le pides educadamente que no lo haga?",
+          sentence: "Would you mind ______ your muddy shoes in the hallway?",
+          speak: "Would you mind not leaving your muddy shoes in the hallway?",
+          options: ["not leave", "not leaving", "leaving"],
+          correct: 1,
+          feedback: "¡Correcto! Para pedir que no hagan algo se usa la estructura completa 'Would you mind not + verbo-ing': not leaving."
+        }
+      },
+      {
+        sceneIcon: "🏥",
+        sceneTitle: "3. Saludo Profesional en Recepción",
+        charLeftKey: "andres",
+        charRightKey: "sofia",
+        dialogues: [
+          { speaker: "Andrés", charKey: "andres", text: "Ring ring... Medical Center. What do you want?", isError: true, note: "Pésima atención al cliente" },
+          { speaker: "Sofía", charKey: "sofia", text: "¡Andrés, cómo vas a decir 'What do you want'! Di bien: 'Medical Center, how may I assist you today?'", isCorrection: true },
+          { speaker: "Andrés", charKey: "andres", text: "¡Uff, verdad! 'How may I assist you' suena mucho más formal y respetuoso.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Al contestar el teléfono en un trabajo o negocio, ofrece tu ayuda diciendo: <strong>'How may I assist you?'</strong>.",
+        challenge: {
+          context: "Situación real: Contestas el teléfono en la recepción de un hotel internacional:",
+          sentence: "Grand Royal Hotel, good afternoon. How ______ I direct your call?",
+          speak: "Grand Royal Hotel, good afternoon. How may I direct your call?",
+          options: ["may", "want", "do"],
+          correct: 0,
+          feedback: "¡Exacto! 'How may I...' es la frase clásica y formal para atender llamadas."
+        }
+      },
+      {
+        sceneIcon: "📶",
+        sceneTitle: "4. Mala Señal / Pedir Repetir",
+        charLeftKey: "martin",
+        charRightKey: "lucia",
+        dialogues: [
+          { speaker: "Martín", charKey: "martin", text: "What?! Speak again! I don't understand you!", isError: true, note: "Muy brusco y desesperado" },
+          { speaker: "Lucía", charKey: "lucia", text: "Tranquilo, Martín. Si se corta la llamada di: 'Could you repeat that, please? The line is breaking up'.", isCorrection: true },
+          { speaker: "Martín", charKey: "martin", text: "¡Buena esa! 'The line is breaking up' deja claro que la llamada se escucha entrecortada.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Si hay mala señal, pide que te repitan con <strong>'Could you repeat that?'</strong> y di <strong>'The line is breaking up'</strong>.",
+        challenge: {
+          context: "Situación real: Estás anotando un código por teléfono pero hubo ruido y no escuchaste bien:",
+          sentence: "I'm sorry, the connection is bad. Could you please ______ that code for me?",
+          speak: "Could you please repeat that code for me?",
+          options: ["repeat", "repeated", "repeating"],
+          correct: 0,
+          feedback: "¡Excelente! Después de 'Could' el verbo siempre queda en forma simple: repeat."
+        }
+      },
+      {
+        sceneIcon: "☎️",
+        sceneTitle: "5. Pasar una Llamada",
+        charLeftKey: "felipe",
+        charRightKey: "diana",
+        dialogues: [
+          { speaker: "Felipe", charKey: "felipe", text: "Hello, I need to talk to the Billing Department.", isError: false },
+          { speaker: "Diana", charKey: "diana", text: "I pass you right now!", isError: true, note: "Spanglish / Traducido palabra por palabra" },
+          { speaker: "Felipe", charKey: "felipe", text: "Jajaja, en inglés no se dice 'pass', se dice: 'I will put you through'.", isCorrection: true },
+          { speaker: "Diana", charKey: "diana", text: "¡Ah ya caigo! 'Hold on, please, I will put you through to Billing'.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Comunicar o pasarle la llamada a otra persona se dice: <strong>'put you through'</strong>.",
+        challenge: {
+          context: "Situación real: Un proveedor llama y pide hablar con el encargado de compras:",
+          sentence: "Please hold on a moment. I will put you ______ to the purchasing manager.",
+          speak: "I will put you through to the purchasing manager.",
+          options: ["through", "over", "across"],
+          correct: 0,
+          feedback: "¡Perfecto! 'Put (someone) through' significa transferir la llamada."
+        }
+      },
+      {
+        sceneIcon: "🏫",
+        sceneTitle: "6. Prestar vs Pedir Prestado",
+        charLeftKey: "javier",
+        charRightKey: "profesora",
+        dialogues: [
+          { speaker: "Javier", charKey: "javier", text: "Teacher, can you borrow me a charger?", isError: true, note: "Confundió borrow con lend" },
+          { speaker: "Profesora", charKey: "profesora", text: "Javier, 'borrow' es pedir prestado. Si tú lo necesitas, di: 'May I borrow your charger?' También puedes pedirle a otra persona: 'Could you lend me your charger?'", isCorrection: true },
+          { speaker: "Javier", charKey: "javier", text: "¿Y entonces cuándo uso 'lend'?", isFinal: false },
+          { speaker: "Profesora", charKey: "profesora", text: "'Lend' es prestar de ti hacia otro. Pero 'May I borrow' es la forma más educada para pedir que te presten.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Si tú pides prestado usas <strong>borrow</strong> ('May I borrow?'). Si tú le prestas a alguien usas <strong>lend</strong>.",
+        challenge: {
+          context: "Situación real: Está lloviendo duro y necesitas que un compañero te preste su sombrilla:",
+          sentence: "It's raining heavily outside. May I ______ your umbrella until tomorrow?",
+          speak: "May I borrow your umbrella until tomorrow?",
+          options: ["borrow", "lend", "take"],
+          correct: 0,
+          feedback: "¡Bien hecho! Usas 'borrow' porque tú eres quien necesita que le presten el objeto."
+        }
+      },
+      {
+        sceneIcon: "🏢",
+        sceneTitle: "7. Pedir una Extensión",
+        charLeftKey: "gabriela",
+        charRightKey: "operador",
+        dialogues: [
+          { speaker: "Gabriela", charKey: "gabriela", text: "Hello! Connect me with number 405!", isError: true, note: "Poco claro y muy seco" },
+          { speaker: "Operador", charKey: "operador", text: "Good morning. In companies we say: 'Could you connect me to extension 405, please?'", isCorrection: true },
+          { speaker: "Gabriela", charKey: "gabriela", text: "¡Ah ya entiendo! Se pide con la palabra 'extension'.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> En oficinas o empresas, a los números internos se les llama <strong>'extensions'</strong>.",
+        challenge: {
+          context: "Situación real: Llamas al conmutador central de una clínica para comunicarte con admisiones:",
+          sentence: "Good morning. Could you please connect me to ______ 204?",
+          speak: "Could you please connect me to extension 204?",
+          options: ["extension", "room", "floor"],
+          correct: 0,
+          feedback: "¡Correcto! En teléfonos de oficina se pide 'extension [número]'."
+        }
+      },
+      {
+        sceneIcon: "📋",
+        sceneTitle: "8. Pedir el Teléfono a Quien Llama",
+        charLeftKey: "oscar",
+        charRightKey: "mariana",
+        dialogues: [
+          { speaker: "Óscar", charKey: "oscar", text: "Give me your telephone digits so we can contact you!", isError: true, note: "Frase rara y nada natural" },
+          { speaker: "Mariana", charKey: "mariana", text: "¡Óscar, qué forma tan extraña de pedirlo! Di normal: 'Could I have your phone number, please?'", isCorrection: true },
+          { speaker: "Óscar", charKey: "oscar", text: "¡Total! 'Could I have your phone number' suena mil veces más natural.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Para pedir el número o los datos de alguien con decencia, usa: <strong>'Could I have your [dato], please?'</strong>.",
+        challenge: {
+          context: "Situación real: El jefe está ocupado y necesitas pedirle el número al cliente para devolverle la llamada:",
+          sentence: "Mr. Davis is currently in a meeting. Could I ______ your callback number, please?",
+          speak: "Could I have your callback number, please?",
+          options: ["have", "give", "take"],
+          correct: 0,
+          feedback: "¡Muy bien! 'Could I have...' es la fórmula educada de pedir información."
+        }
+      },
+      {
+        sceneIcon: "💼",
+        sceneTitle: "9. Decir que NO con Buena Educación",
+        charLeftKey: "esteban",
+        charRightKey: "sara",
+        dialogues: [
+          { speaker: "Esteban", charKey: "esteban", text: "Sara, can you take my weekend shift?", isError: false },
+          { speaker: "Sara", charKey: "sara", text: "No, never!", isError: true, note: "Un 'no' seco y de mala gana" },
+          { speaker: "Esteban", charKey: "esteban", text: "¡Uy Sara, qué respuesta tan cortante!", isCorrection: true },
+          { speaker: "Sara", charKey: "sara", text: "Perdón, quise decir: 'I'm afraid I can't this weekend, I already have plans'. Suena mucho mejor.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Para no soltar un 'NO' seco o grosero, dilo con respeto: <strong>'I'm afraid I can't...'</strong>.",
+        challenge: {
+          context: "Situación real: Alguien quiere entrar a una sala privada sin su carnet de visitante y debes frenarlo sin ser grosero:",
+          sentence: "Excuse me, sir. I'm afraid you ______ enter without your visitor badge.",
+          speak: "I'm afraid you cannot enter without your visitor badge.",
+          options: ["cannot", "must", "may"],
+          correct: 0,
+          feedback: "¡Exacto! 'I'm afraid you cannot...' aclara que no se puede pero con total decencia."
+        }
+      },
+      {
+        sceneIcon: "🎧",
+        sceneTitle: "10. Despedirse Bien por Teléfono",
+        charLeftKey: "mateo",
+        charRightKey: "natalia",
+        dialogues: [
+          { speaker: "Mateo", charKey: "mateo", text: "Ok, that is all. Bye! (Cuelga de una)", isError: true, note: "Colgó de golpe sin despedirse bien" },
+          { speaker: "Natalia", charKey: "natalia", text: "¡No le tires el teléfono al cliente! Siempre se da las gracias antes de colgar.", isCorrection: true },
+          { speaker: "Mateo", charKey: "mateo", text: "¿Y qué frase digo para cerrar bien?", isFinal: false },
+          { speaker: "Natalia", charKey: "natalia", text: "'Thank you for calling [empresa], have a wonderful day!'. Fácil y profesional.", isFinal: true }
+        ],
+        rule: "💡 <strong>Tip Clave:</strong> Antes de colgar una llamada de trabajo, siempre da las gracias con: <strong>'Thank you for calling'</strong>.",
+        challenge: {
+          context: "Situación real: Terminaste de atender a un cliente y vas a cerrar la llamada formalmente:",
+          sentence: "Thank you for ______ Continental Airlines. Have a wonderful trip!",
+          speak: "Thank you for calling Continental Airlines. Have a wonderful trip!",
+          options: ["calling", "called", "call"],
+          correct: 0,
+          feedback: "¡Eso es! Después de 'for' el verbo siempre lleva -ING: calling."
+        }
+      }
+    ];
+
+    /* ==========================================================================
+       4. ANIMATED STAGE CONTROLLER (BEAT BY BEAT)
+       ========================================================================== */
+    let currentModIdx = 0;
+    let currentBeatIdx = 0;
+    let quizScore = 0;
+    let isTransitioningBeat = false;
+    let isDialogueComplete = false;
+    let studentName = '';
+
+    function startActivity() {
+      const nameInput = document.getElementById('studentName');
+      const enteredName = nameInput.value.trim().replace(/\s+/g, ' ');
+      const nameParts = enteredName.split(' ').filter(Boolean);
+      const errorMessage = document.getElementById('studentNameError');
+
+      if (nameParts.length < 2) {
+        errorMessage.classList.remove('hidden');
+        nameInput.focus();
+        return;
+      }
+
+      studentName = enteredName;
+      errorMessage.classList.add('hidden');
+      document.getElementById('studentStartScreen').classList.add('hidden');
+    }
+
+    function renderModule() {
+      const m = modules[currentModIdx];
+      currentBeatIdx = 0;
+      isTransitioningBeat = false;
+      isDialogueComplete = false;
+
+      // Update Meta
+      document.getElementById('moduleBadge').textContent = `Módulo ${currentModIdx + 1} de ${modules.length}`;
+      document.getElementById('sceneIconBadge').textContent = m.sceneIcon || '💬';
+      document.getElementById('sceneTitleText').textContent = m.sceneTitle;
+      updateModuleNavigation();
+
+      // Reset stages
+      document.getElementById('challengeCard').classList.add('hidden');
+      document.getElementById('stageCard').classList.remove('hidden');
+
+      // Setup Progress Bars
+      const barsContainer = document.getElementById('storyProgressBars');
+      barsContainer.innerHTML = '';
+      m.dialogues.forEach((_, idx) => {
+        const bar = document.createElement('div');
+        bar.className = 'h-1.5 flex-1 rounded-full bg-slate-800 transition-all duration-300';
+        bar.id = `storyBar_${idx}`;
+        barsContainer.appendChild(bar);
+      });
+
+      // Clear stage slots
+      document.getElementById('charLeftSlot').innerHTML = '';
+      document.getElementById('charRightSlot').innerHTML = '';
+      document.getElementById('bubbleContainer').innerHTML = '';
+
+      revealChallenge(false);
+
+      // Play scene entrance
+      showDialogueBeat(0);
+    }
+
+    function showDialogueBeat(beatIdx) {
+      const m = modules[currentModIdx];
+      if (beatIdx >= m.dialogues.length) {
+        completeDialogueScene();
+        return;
+      }
+
+      currentBeatIdx = beatIdx;
+      isTransitioningBeat = false;
+      updateDialogueNavigation();
+
+      // Update story progress bar
+      m.dialogues.forEach((_, idx) => {
+        const bar = document.getElementById(`storyBar_${idx}`);
+        if (bar) {
+          if (idx <= beatIdx) {
+            bar.className = 'h-1.5 flex-1 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50 transition-all duration-300';
+          } else {
+            bar.className = 'h-1.5 flex-1 rounded-full bg-slate-800 transition-all duration-300';
+          }
+        }
+      });
+
+      document.getElementById('beatCounter').textContent = `Paso ${beatIdx + 1}/${m.dialogues.length}`;
+
+      const d = m.dialogues[beatIdx];
+      const isLeftSpeaker = (d.charKey === m.charLeftKey);
+      const activeCharKey = d.charKey;
+      const speakerProfile = CHARACTER_PROFILES[activeCharKey] || CHARACTER_PROFILES.santiago;
+
+      // Emotion state
+      let emotionState = 'normal';
+      if (d.isError) emotionState = 'error';
+      else if (d.isCorrection) emotionState = 'correction';
+      else if (d.isFinal) emotionState = 'final';
+
+      // 1. Play Entrance & Exit animations for characters
+      const leftSlot = document.getElementById('charLeftSlot');
+      const rightSlot = document.getElementById('charRightSlot');
+
+      if (isLeftSpeaker) {
+        // Left character speaks!
+        leftSlot.innerHTML = renderCharacterSVG(activeCharKey, true, emotionState);
+        leftSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center anim-enter-left';
+        // Right slot: if it had a character, slide them out smoothly
+        if (rightSlot.innerHTML.trim() !== '') {
+          rightSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center anim-exit-right';
+          setTimeout(() => {
+            if (isLeftSpeaker) rightSlot.innerHTML = '';
+          }, 350);
+        }
+      } else {
+        // Right character speaks!
+        rightSlot.innerHTML = renderCharacterSVG(activeCharKey, true, emotionState);
+        rightSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center anim-enter-right';
+        // Left slot: slide out smoothly
+        if (leftSlot.innerHTML.trim() !== '') {
+          leftSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center anim-exit-left';
+          setTimeout(() => {
+            if (!isLeftSpeaker) leftSlot.innerHTML = '';
+          }, 350);
+        }
+      }
+
+      // 2. Format speech message with highlighted chips
+      let formattedText = d.text.replace(/'((?:[^']|'[A-Za-z])+)'/g, `<mark class="bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-lg border border-amber-400/40 font-mono font-bold">'$1'</mark>`);
+
+      // 3. Render Floating Speech Bubble
+      const bubbleContainer = document.getElementById('bubbleContainer');
+      const pointerClass = isLeftSpeaker ? 'bubble-pointer-left' : 'bubble-pointer-right';
+
+      let badgeHtml = '';
+      if (d.isError) {
+        badgeHtml = `<span class="bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">⚠️ ${d.note || 'Error'}</span>`;
+      } else if (d.isCorrection) {
+        badgeHtml = `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">💡 Forma Correcta</span>`;
+      } else if (d.isFinal) {
+        badgeHtml = `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">✨ Entendido</span>`;
+      }
+
+      bubbleContainer.innerHTML = `
+        <div id="activeBubble" class="speech-bubble ${pointerClass}">
+          <!-- Bubble Header -->
+          <div class="flex items-center justify-between gap-2 mb-2 border-b border-slate-800 pb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black" style="background-color: ${speakerProfile.themeColor}33; border: 1.5px solid ${speakerProfile.themeColor};">
+                ${speakerProfile.emoji || '👤'}
+              </span>
+              <span class="text-xs font-black tracking-wide" style="color: ${speakerProfile.themeColor};">${d.speaker}</span>
+              ${badgeHtml}
+            </div>
+          </div>
+
+          <!-- Bubble Main Text (Large and readable) -->
+          <p class="text-[15px] sm:text-base font-semibold text-slate-100 leading-snug tracking-tight">
+            ${formattedText}
+          </p>
+
+          <!-- Prompt hint -->
+          <div class="flex items-center justify-end text-[10px] text-slate-400 font-bold mt-2 pt-1.5 border-t border-slate-800/80">
+            <span>Usa las flechas para continuar</span>
+          </div>
+        </div>
+      `;
+
+    }
+
+    function updateDialogueNavigation() {
+      const previousButton = document.getElementById('stagePrevBtn');
+      const nextButton = document.getElementById('stageNextBtn');
+      previousButton.disabled = currentBeatIdx === 0;
+      nextButton.disabled = isDialogueComplete;
+    }
+
+    function nextDialogueBeat() {
+      if (isTransitioningBeat || isDialogueComplete) return;
+      isTransitioningBeat = true;
+
+      const m = modules[currentModIdx];
+      const bubble = document.getElementById('activeBubble');
+      const leftSlot = document.getElementById('charLeftSlot');
+      const rightSlot = document.getElementById('charRightSlot');
+
+      // Animate bubble exit
+      if (bubble) {
+        bubble.className += ' bubble-leaving';
+      }
+
+      // Animate current character exit
+      const currentBeat = m.dialogues[currentBeatIdx];
+      if (currentBeat) {
+        if (currentBeat.charKey === m.charLeftKey) {
+          leftSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center anim-exit-left';
+        } else {
+          rightSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center anim-exit-right';
+        }
+      }
+
+      setTimeout(() => {
+        const nextIdx = currentBeatIdx + 1;
+        if (nextIdx < m.dialogues.length) {
+          showDialogueBeat(nextIdx);
+        } else {
+          completeDialogueScene();
+        }
+      }, 260);
+    }
+
+    function previousDialogueBeat() {
+      if (isTransitioningBeat) return;
+      const previousIdx = isDialogueComplete ? modules[currentModIdx].dialogues.length - 1 : currentBeatIdx - 1;
+      if (previousIdx < 0) return;
+      isDialogueComplete = false;
+      showDialogueBeat(previousIdx);
+    }
+
+    function updateModuleNavigation() {
+      document.getElementById('modulePrevBtn').disabled = currentModIdx === 0;
+      document.getElementById('moduleNextBtn').disabled = currentModIdx === modules.length - 1;
+    }
+
+    function previousModule() {
+      if (currentModIdx === 0) return;
+      currentModIdx--;
+      renderModule();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextModuleFromSide() {
+      if (currentModIdx >= modules.length - 1) return;
+      currentModIdx++;
+      renderModule();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function completeDialogueScene() {
+      const m = modules[currentModIdx];
+      isTransitioningBeat = false;
+      isDialogueComplete = true;
+      updateDialogueNavigation();
+
+      const leftSlot = document.getElementById('charLeftSlot');
+      const rightSlot = document.getElementById('charRightSlot');
+
+      leftSlot.innerHTML = renderCharacterSVG(m.charLeftKey, false, 'normal');
+      rightSlot.innerHTML = renderCharacterSVG(m.charRightKey, false, 'normal');
+
+      leftSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center';
+      rightSlot.className = 'w-[140px] h-[155px] relative flex items-end justify-center';
+      document.getElementById('bubbleContainer').innerHTML = `
+        <div class="speech-bubble bg-emerald-950/90 border-emerald-500/50 text-center py-3">
+          <span class="text-xs uppercase font-black text-emerald-400 tracking-wider block mb-1">¡Bien hecho!</span>
+          <p class="text-sm font-bold text-white">Completaste la conversación.</p>
+        </div>
+      `;
+
+    }
+
+    /* ==========================================================================
+       5. RULE & CHALLENGE INTERACTION
+       ========================================================================== */
+    function revealChallenge(shouldScroll = true) {
+      const chalBox = document.getElementById('challengeCard');
+      chalBox.classList.remove('hidden');
+
+      const m = modules[currentModIdx];
+      document.getElementById('challengeContext').textContent = m.challenge.context;
+      document.getElementById('challengeSentence').textContent = m.challenge.sentence;
+
+      const optsBox = document.getElementById('optionsContainer');
+      optsBox.innerHTML = '';
+
+      m.challenge.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left bg-slate-950 hover:bg-slate-800 text-white font-bold p-3.5 rounded-2xl border-2 border-slate-800 transition-all flex items-center justify-between active:scale-[0.98]";
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-black text-amber-400">${['A', 'B', 'C'][idx]}</span>
+            <span class="text-sm font-bold">${opt}</span>
+          </div>
+          <span class="w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-xs"></span>
+        `;
+        btn.onclick = () => selectChallengeAnswer(idx, btn);
+        optsBox.appendChild(btn);
+      });
+
+      document.getElementById('feedbackBox').className = "mt-3.5 p-3 rounded-2xl hidden";
+      document.getElementById('nextModuleBtn').classList.add('hidden');
+
+      if (shouldScroll) {
+        chalBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function selectChallengeAnswer(selectedIdx, btnElement) {
+      const m = modules[currentModIdx];
+      const buttons = document.querySelectorAll('#optionsContainer button');
+      buttons.forEach(b => b.disabled = true);
+
+      const fBox = document.getElementById('feedbackBox');
+      const fText = document.getElementById('feedbackText');
+      fBox.classList.remove('hidden');
+
+      if (selectedIdx === m.challenge.correct) {
+        quizScore++;
+        btnElement.classList.remove('bg-slate-950', 'border-slate-800');
+        btnElement.classList.add('bg-emerald-600', 'border-emerald-400');
+        fBox.className = "mt-3.5 p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-300";
+        fText.innerHTML = `<strong>¡Correcto!</strong> ${m.challenge.feedback}`;
+      } else {
+        btnElement.classList.remove('bg-slate-950', 'border-slate-800');
+        btnElement.classList.add('bg-rose-600', 'border-rose-400');
+        buttons[m.challenge.correct].classList.remove('bg-slate-950', 'border-slate-800');
+        buttons[m.challenge.correct].classList.add('bg-emerald-600', 'border-emerald-400');
+        fBox.className = "mt-3.5 p-3.5 rounded-2xl bg-rose-500/20 border border-rose-500/50 text-rose-300";
+        fText.innerHTML = `<strong>Incorrecto:</strong> ${m.challenge.feedback}`;
+      }
+
+      updateLiveGrade();
+      const nextBtn = document.getElementById('nextModuleBtn');
+      nextBtn.classList.remove('hidden');
+      nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function nextModule() {
+      currentModIdx++;
+      if (currentModIdx < modules.length) {
+        renderModule();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        document.getElementById('learningPhase').classList.add('hidden');
+        document.getElementById('wordsearchPhase').classList.remove('hidden');
+        initWordSearch();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    /* ==========================================================================
+       6. FASE 2: SOPA DE LETRAS - 8x8 TÁCTIL (TOUCH-SWIPE)
+       ========================================================================== */
+    const searchWords = [
+      { word: "PHONE", clue: "Dispositivo para comunicarte: 'Could I have your phone number?'" },
+      { word: "COULD", clue: "Modal clave para solicitudes amables: 'Could you please...?'" },
+      { word: "WOULD", clue: "Usado en cortesía formal: 'Would you mind not...?'" },
+      { word: "MAY",   clue: "Modal protocolario para pedir permiso: 'May I borrow...?'" },
+      { word: "HOLD",  clue: "Poner en espera en la llamada: 'Please hold on a moment'." }
+    ];
+
+    const gridLetters = [
+      ['P','H','O','N','E','A','B','C'],
+      ['D','C','O','U','L','D','E','F'],
+      ['G','H','I','J','K','L','M','N'],
+      ['W','O','U','L','D','O','P','Q'],
+      ['R','S','T','U','V','W','X','Y'],
+      ['Z','M','A','Y','B','C','D','E'],
+      ['F','G','H','O','L','D','I','J'],
+      ['K','L','M','N','O','P','Q','R']
+    ];
+
+    let currentWordIdx = 0;
+    let foundWordsCount = 0;
+    let selectedCells = [];
+    let isPointerDown = false;
+    let currentTargetWord = searchWords[0].word;
+
+    function initWordSearch() {
+      updateWordTargetUI();
+      renderGrid();
+    }
+
+    function updateWordTargetUI() {
+      if (currentWordIdx < searchWords.length) {
+        const item = searchWords[currentWordIdx];
+        currentTargetWord = item.word;
+        document.getElementById('wordProgressBadge').textContent = `Palabra ${currentWordIdx + 1} de 5`;
+        document.getElementById('targetWordDisplay').textContent = item.word;
+        document.getElementById('targetWordClue').textContent = item.clue;
+      }
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('gridContainer');
+      container.innerHTML = '';
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const cell = document.createElement('div');
+          cell.className = "grid-cell bg-slate-900 text-white border border-slate-800";
+          cell.textContent = gridLetters[r][c];
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          container.appendChild(cell);
+        }
+      }
+
+      container.addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+    }
+
+    function getCellFromPoint(x, y) {
+      const el = document.elementFromPoint(x, y);
+      if (el && el.classList.contains('grid-cell')) return el;
+      return null;
+    }
+
+    function onPointerDown(e) {
+      const cell = getCellFromPoint(e.clientX, e.clientY);
+      if (!cell) return;
+      isPointerDown = true;
+      selectedCells = [cell];
+      highlightSelected();
+    }
+
+    function onPointerMove(e) {
+      if (!isPointerDown) return;
+      const cell = getCellFromPoint(e.clientX, e.clientY);
+      if (cell && !selectedCells.includes(cell)) {
+        selectedCells.push(cell);
+        highlightSelected();
+      }
+    }
+
+    function onPointerUp() {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+      validateSelection();
+    }
+
+    function highlightSelected() {
+      document.querySelectorAll('.grid-cell:not(.found)').forEach(c => {
+        c.className = "grid-cell bg-slate-900 text-white border border-slate-800";
+      });
+      selectedCells.forEach(c => {
+        if (!c.classList.contains('found')) {
+          c.className = "grid-cell bg-amber-400 text-black border border-amber-300 font-black shadow-md";
+        }
+      });
+    }
+
+    function validateSelection() {
+      const formedWord = selectedCells.map(c => c.textContent).join('');
+      const reversedWord = selectedCells.map(c => c.textContent).reverse().join('');
+
+      if (formedWord === currentTargetWord || reversedWord === currentTargetWord) {
+        selectedCells.forEach(c => {
+          c.className = "grid-cell bg-emerald-500 text-black font-black found border border-emerald-400 shadow-md";
+        });
+
+        addFoundBadge(currentTargetWord);
+        foundWordsCount++;
+        currentWordIdx++;
+        updateLiveGrade();
+
+        if (currentWordIdx < searchWords.length) {
+          updateWordTargetUI();
+        } else {
+          setTimeout(showFinalResults, 600);
+        }
+      } else {
+        selectedCells.forEach(c => {
+          if (!c.classList.contains('found')) {
+            c.className = "grid-cell bg-rose-600 text-white border border-rose-400 font-black";
+          }
+        });
+        setTimeout(() => {
+          selectedCells.forEach(c => {
+            if (!c.classList.contains('found')) {
+              c.className = "grid-cell bg-slate-900 text-white border border-slate-800";
+            }
+          });
+        }, 300);
+      }
+      selectedCells = [];
+    }
+
+    function addFoundBadge(word) {
+      const badge = document.createElement('span');
+      badge.className = "bg-emerald-500 text-black font-black text-xs px-2.5 py-1 rounded-full mono shadow-sm";
+      badge.textContent = `✓ ${word}`;
+      document.getElementById('foundBadgesContainer').appendChild(badge);
+    }
+
+    /* ==========================================================================
+       7. NOTA (0.0 A 5.0) & REPORTE FINAL
+       ========================================================================== */
+    function calculateGrade() {
+      const totalPoints = quizScore + foundWordsCount; // Máximo 15
+      const grade = (totalPoints / 15) * 5.0;
+      return grade.toFixed(1);
+    }
+
+    function updateLiveGrade() {
+      document.getElementById('headerScore').textContent = calculateGrade();
+    }
+
+    function showFinalResults() {
+      document.getElementById('wordsearchPhase').classList.add('hidden');
+      document.getElementById('resultPhase').classList.remove('hidden');
+
+      const finalVal = parseFloat(calculateGrade());
+      document.getElementById('finalStudentName').textContent = studentName;
+      document.getElementById('finalGrade').textContent = finalVal.toFixed(1);
+
+      const catBadge = document.getElementById('gradeCategory');
+      if (finalVal >= 4.6) {
+        catBadge.textContent = "Desempeño Superior";
+        catBadge.className = "inline-block mt-2 px-3.5 py-1 rounded-full text-xs font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+      } else if (finalVal >= 4.0) {
+        catBadge.textContent = "Desempeño Alto";
+        catBadge.className = "inline-block mt-2 px-3.5 py-1 rounded-full text-xs font-black uppercase bg-blue-500/20 text-blue-300 border border-blue-500/40";
+      } else if (finalVal >= 3.0) {
+        catBadge.textContent = "Desempeño Básico";
+        catBadge.className = "inline-block mt-2 px-3.5 py-1 rounded-full text-xs font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40";
+      } else {
+        catBadge.textContent = "Desempeño Bajo";
+        catBadge.className = "inline-block mt-2 px-3.5 py-1 rounded-full text-xs font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40";
+      }
+
+    }
+
+    // Inicializar el primer módulo animado al cargar la página
+    renderModule();
+  </script>
 </body>
 </html>
