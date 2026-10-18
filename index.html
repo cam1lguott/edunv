@@ -49,22 +49,25 @@
     const movie = document.getElementById('movie');
     let lastTap = 0;
 
-    function toggleFullscreen() {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else if (movie.requestFullscreen) {
+    function enterFullscreen() {
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || movie.webkitDisplayingFullscreen;
+      if (isFullscreen) {
+        return;
+      }
+
+      if (movie.requestFullscreen) {
         movie.requestFullscreen();
       } else if (movie.webkitEnterFullscreen) {
         movie.webkitEnterFullscreen();
       }
     }
 
-    movie.addEventListener('dblclick', toggleFullscreen);
+    movie.addEventListener('dblclick', enterFullscreen);
     movie.addEventListener('pointerup', (event) => {
       if (event.pointerType === 'touch') {
         const now = Date.now();
         if (now - lastTap < 350) {
-          toggleFullscreen();
+          enterFullscreen();
         }
         lastTap = now;
       }
