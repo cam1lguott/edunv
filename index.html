@@ -72,7 +72,7 @@
     Presiona dos veces para pantalla completa
   </div>
 
-  <video id="movie" controls autoplay playsinline preload="metadata">
+  <video id="movie" controls autoplay muted playsinline preload="metadata">
     <source src="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de video HTML5.
   </video>
@@ -80,6 +80,11 @@
   <script>
     const movie = document.getElementById('movie');
     let lastTap = 0;
+
+    function enableAudio() {
+      movie.muted = false;
+      movie.volume = 1;
+    }
 
     function enterFullscreen() {
       const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || movie.webkitDisplayingFullscreen;
@@ -95,6 +100,8 @@
     }
 
     movie.addEventListener('dblclick', enterFullscreen);
+    movie.addEventListener('pointerup', enableAudio, { once: true });
+    movie.addEventListener('click', enableAudio, { once: true });
     movie.addEventListener('pointerup', (event) => {
       if (event.pointerType === 'touch') {
         const now = Date.now();
