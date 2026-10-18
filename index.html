@@ -45,10 +45,36 @@
       inset: 0;
       z-index: 5;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      padding: 32px 20px 48px;
-      background: linear-gradient(transparent 35%, rgba(0, 0, 0, 0.9));
+      padding: 24px;
+      background: radial-gradient(circle at center, #202020 0%, #080808 48%, #000 100%);
+    }
+
+    .start-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: min(100%, 520px);
+      text-align: center;
+    }
+
+    .brand {
+      margin: 0;
+      color: #fff;
+      font: 600 clamp(38px, 11vw, 76px) "Cinzel", Georgia, serif;
+      letter-spacing: 5px;
+      line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 0 4px 22px rgba(255, 255, 255, 0.2);
+    }
+
+    .movie-title {
+      margin: -10px 0 0;
+      color: rgba(255, 255, 255, 0.72);
+      font: 500 clamp(16px, 4vw, 24px) "Cinzel", Georgia, serif;
+      letter-spacing: 2px;
     }
 
     #startButton {
@@ -73,16 +99,22 @@
       display: none;
     }
 
+    video[hidden] {
+      display: none;
+    }
+
   </style>
 </head>
 <body>
   <div class="start-screen" id="startScreen">
-    <button id="startButton" type="button">
-      Comenzar Spider-Man: Un Nuevo Día
-    </button>
+    <div class="start-content">
+      <h1 class="brand">Spider-Man</h1>
+      <p class="movie-title">Un Nuevo Día</p>
+      <button id="startButton" type="button">Comenzar película</button>
+    </div>
   </div>
 
-  <video id="movie" controls playsinline preload="metadata">
+  <video id="movie" controls playsinline preload="metadata" hidden>
     <source src="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de video HTML5.
   </video>
@@ -113,6 +145,7 @@
 
     startButton.addEventListener('click', () => {
       enableAudio();
+      movie.hidden = false;
       movie.play();
       startScreen.hidden = true;
       enterFullscreen();
