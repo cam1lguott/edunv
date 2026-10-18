@@ -40,45 +40,57 @@
       background: #000;
     }
 
-    .start-message {
+    .start-screen {
       position: fixed;
       inset: 0;
       z-index: 5;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      color: #fff;
-      font-family: "Cinzel", Georgia, serif;
-      font-size: clamp(18px, 4vw, 32px);
-      font-weight: 600;
-      letter-spacing: 1px;
-      line-height: 1.4;
-      text-align: center;
-      pointer-events: none;
-      animation: cinemaHint 2s ease forwards;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 32px 20px 48px;
+      background: linear-gradient(transparent 35%, rgba(0, 0, 0, 0.9));
     }
 
-    @keyframes cinemaHint {
-      0% { opacity: 0; }
-      20% { opacity: 1; }
-      70% { opacity: 1; }
-      100% { opacity: 0; }
+    #startButton {
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 4px;
+      padding: 16px 24px;
+      color: #fff;
+      background: rgba(12, 12, 12, 0.88);
+      font: 600 clamp(15px, 3.5vw, 22px) "Cinzel", Georgia, serif;
+      letter-spacing: 0.5px;
+      line-height: 1.3;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+    }
+
+    #startButton:active {
+      transform: scale(0.98);
+    }
+
+    .start-screen[hidden] {
+      display: none;
     }
 
   </style>
 </head>
 <body>
-  <div class="start-message">
-    Presiona dos veces para pantalla completa
+  <div class="start-screen" id="startScreen">
+    <button id="startButton" type="button">
+      Comenzar Spider-Man: Un Nuevo Día
+    </button>
   </div>
 
-  <video id="movie" controls autoplay playsinline preload="metadata">
+  <video id="movie" controls playsinline preload="metadata">
     <source src="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de video HTML5.
   </video>
 
   <script>
     const movie = document.getElementById('movie');
+    const startScreen = document.getElementById('startScreen');
+    const startButton = document.getElementById('startButton');
     let lastTap = 0;
 
     function enableAudio() {
@@ -98,6 +110,13 @@
         movie.webkitEnterFullscreen();
       }
     }
+
+    startButton.addEventListener('click', () => {
+      enableAudio();
+      movie.play();
+      startScreen.hidden = true;
+      enterFullscreen();
+    });
 
     movie.addEventListener('dblclick', enterFullscreen);
     movie.addEventListener('pointerup', enableAudio, { once: true });
