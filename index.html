@@ -37,6 +37,26 @@
       background: #000;
     }
 
+    .progress-container {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      padding: 10px 14px 12px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.82));
+    }
+
+    #progress {
+      display: block;
+      width: 100%;
+      height: 24px;
+      margin: 0;
+      accent-color: #fff;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
   </style>
 </head>
 <body>
@@ -44,5 +64,27 @@
     <source src="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de video HTML5.
   </video>
+  <div class="progress-container">
+    <input id="progress" type="range" min="0" max="100" step="0.1" value="0" aria-label="Progreso de la película">
+  </div>
+
+  <script>
+    const movie = document.getElementById('movie');
+    const progress = document.getElementById('progress');
+
+    function updateProgress() {
+      if (movie.duration) {
+        progress.value = (movie.currentTime / movie.duration) * 100;
+      }
+    }
+
+    movie.addEventListener('loadedmetadata', updateProgress);
+    movie.addEventListener('timeupdate', updateProgress);
+    progress.addEventListener('input', () => {
+      if (movie.duration) {
+        movie.currentTime = (progress.value / 100) * movie.duration;
+      }
+    });
+  </script>
 </body>
 </html>
