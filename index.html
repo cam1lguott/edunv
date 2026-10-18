@@ -70,22 +70,24 @@
 
     #startButton {
       border: 1px solid #e31b23;
-      border-radius: 2px;
-      padding: 13px 24px;
-      color: #ffd400;
-      background: #071b45;
-      font: 600 clamp(14px, 3.2vw, 19px) Georgia, "Times New Roman", serif;
+      border-radius: 30px;
+      padding: 13px 28px;
+      color: #ff4a52;
+      background: rgba(0, 0, 0, 0.24);
+      font: 600 clamp(14px, 3.2vw, 18px) Georgia, "Times New Roman", serif;
       letter-spacing: 0.8px;
       line-height: 1.3;
       text-align: center;
       text-transform: uppercase;
       cursor: pointer;
-      transition: background 180ms ease, color 180ms ease;
+      box-shadow: 0 0 18px rgba(227, 27, 35, 0.22);
+      transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
     }
 
     #startButton:hover {
       color: #fff;
-      background: #c9141d;
+      background: #b5121b;
+      box-shadow: 0 0 24px rgba(227, 27, 35, 0.45);
     }
 
     #startButton:active {
