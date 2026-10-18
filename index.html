@@ -36,12 +36,46 @@
       object-fit: contain;
       background: #000;
     }
+
+    #soundButton {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 18px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      font: 600 16px system-ui, sans-serif;
+      cursor: pointer;
+    }
+
+    #soundButton[hidden] {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <video controls playsinline preload="metadata" volume="1">
+  <video id="movie" controls playsinline preload="metadata">
     <source src="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mkv" type="video/x-matroska">
     Tu navegador no soporta la reproducción de video HTML5.
   </video>
+  <button id="soundButton" type="button">Activar sonido</button>
+
+  <script>
+    const movie = document.getElementById('movie');
+    const soundButton = document.getElementById('soundButton');
+
+    function enableSound() {
+      movie.muted = false;
+      movie.volume = 1;
+      soundButton.hidden = true;
+    }
+
+    soundButton.addEventListener('click', enableSound);
+    movie.addEventListener('play', enableSound);
+    movie.addEventListener('click', enableSound);
+  </script>
 </body>
 </html>
