@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Reproductor de película</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       background: #000;
@@ -37,9 +40,38 @@
       background: #000;
     }
 
+    .start-message {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: #fff;
+      font-family: "Cinzel", Georgia, serif;
+      font-size: clamp(18px, 4vw, 32px);
+      font-weight: 600;
+      letter-spacing: 1px;
+      line-height: 1.4;
+      text-align: center;
+      pointer-events: none;
+      animation: cinemaHint 2s ease forwards;
+    }
+
+    @keyframes cinemaHint {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
   </style>
 </head>
 <body>
+  <div class="start-message">
+    Presiona dos veces para pantalla completa
+  </div>
+
   <video id="movie" controls playsinline preload="metadata">
     <source src="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de video HTML5.
