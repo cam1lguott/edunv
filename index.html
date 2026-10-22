@@ -48,50 +48,45 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background: radial-gradient(circle at center, #101c3d 0%, #070b18 48%, #020308 100%);
+      background: radial-gradient(circle at center, #111b35 0%, #070b18 48%, #020308 100%);
     }
 
-    .start-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      width: min(100%, 520px);
-      text-align: center;
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(18px, 4vw, 42px);
+      width: min(100%, 840px);
     }
 
-    .movie-logo {
+    .movie-card {
       display: block;
-      width: min(86vw, 520px);
-      max-height: 42vh;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      appearance: none;
+      transition: transform 220ms ease, filter 220ms ease;
+    }
+
+    .movie-card:hover,
+    .movie-card:focus-visible {
+      transform: translateY(-8px) scale(1.02);
+      filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.65));
+      outline: none;
+    }
+
+    .movie-card:focus-visible img {
+      outline: 2px solid #e31b23;
+      outline-offset: 6px;
+    }
+
+    .movie-poster {
+      display: block;
+      width: 100%;
+      height: clamp(260px, 58vh, 560px);
       object-fit: contain;
       filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.65));
-    }
-
-    #startButton {
-      border: 1px solid #e31b23;
-      border-radius: 30px;
-      padding: 13px 28px;
-      color: #ff4a52;
-      background: rgba(0, 0, 0, 0.24);
-      font: 600 clamp(14px, 3.2vw, 18px) Georgia, "Times New Roman", serif;
-      letter-spacing: 0.8px;
-      line-height: 1.3;
-      text-align: center;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 0 18px rgba(227, 27, 35, 0.22);
-      transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
-    }
-
-    #startButton:hover {
-      color: #fff;
-      background: #b5121b;
-      box-shadow: 0 0 24px rgba(227, 27, 35, 0.45);
-    }
-
-    #startButton:active {
-      transform: scale(0.98);
     }
 
     .start-screen[hidden] {
@@ -106,12 +101,13 @@
 </head>
 <body>
   <div class="start-screen" id="startScreen">
-    <div class="start-content">
-      <img
-        class="movie-logo"
-        src="https://image.tmdb.org/t/p/original/rnavfVc4txcNYI8SE6UrQaHi7fV.png"
-        alt="Spider-Man: Un Nuevo Día">
-      <button id="startButton" type="button">Comenzar película</button>
+    <div class="movie-grid">
+      <button class="movie-card" type="button" data-video="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" aria-label="Reproducir Spider-Man: Un Nuevo Día">
+        <img class="movie-poster" src="https://m.media-amazon.com/images/S/pv-target-images/f7d270229dde123ea3b76f0fc91fb064b2330c97a9f757096618469b5a52118e.jpg" alt="Portada de Spider-Man: Un Nuevo Día">
+      </button>
+      <button class="movie-card" type="button" data-video="https://229f0ac7acdf1af8bfe92f4b01e4dbd.r2.cloudflarestorage.com/pelicula/elfinaldelacalleoak.mp4" aria-label="Reproducir El final de la calle Oak">
+        <img class="movie-poster" src="https://es.web.img3.acsta.net/img/61/97/61972d89c1722f4cfaa0301723e7db88.png" alt="Portada de El final de la calle Oak">
+      </button>
     </div>
   </div>
 
@@ -123,7 +119,7 @@
   <script>
     const movie = document.getElementById('movie');
     const startScreen = document.getElementById('startScreen');
-    const startButton = document.getElementById('startButton');
+    const movieCards = document.querySelectorAll('.movie-card');
     let lastTap = 0;
 
     function enableAudio() {
@@ -144,12 +140,20 @@
       }
     }
 
-    startButton.addEventListener('click', () => {
+    function playMovie(videoUrl) {
       enableAudio();
+      movie.src = videoUrl;
       movie.hidden = false;
-      movie.play();
       startScreen.hidden = true;
+      movie.load();
+      movie.play().catch(() => {});
       enterFullscreen();
+    }
+
+    movieCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        playMovie(card.dataset.video);
+      });
     });
 
     movie.addEventListener('dblclick', enterFullscreen);
