@@ -146,9 +146,17 @@
       movie.hidden = false;
       startScreen.hidden = true;
       movie.load();
-      movie.play().catch(() => {});
+      movie.play().catch(() => {
+        movie.hidden = true;
+        startScreen.hidden = false;
+      });
       enterFullscreen();
     }
+
+    movie.addEventListener('error', () => {
+      movie.hidden = true;
+      startScreen.hidden = false;
+    });
 
     movieCards.forEach((card) => {
       card.addEventListener('click', () => {
