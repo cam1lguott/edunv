@@ -53,7 +53,7 @@
 
     .movie-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: clamp(18px, 4vw, 42px);
       width: min(100%, 840px);
     }
@@ -97,6 +97,21 @@
       display: none;
     }
 
+    @media (max-width: 700px) {
+      .start-screen {
+        padding: 16px;
+      }
+
+      .movie-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .movie-poster {
+        height: 42vh;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -107,6 +122,9 @@
       </button>
       <button class="movie-card" type="button" data-video="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/elfinaldelacalleoak.mp4" aria-label="Reproducir El final de la calle Oak">
         <img class="movie-poster" src="https://es.web.img3.acsta.net/img/61/97/61972d89c1722f4cfaa0301723e7db88.png" alt="Portada de El final de la calle Oak">
+      </button>
+      <button class="movie-card" type="button" data-video="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/animalespeligrosos.mp4" aria-label="Reproducir Animales peligrosos">
+        <img class="movie-poster" src="https://m.media-amazon.com/images/S/pv-target-images/5e3420549474fc216e4d6348060270f1ce9df009df3b5d8a9c4d4ce6e05f4ac2.png" alt="Portada de Animales peligrosos">
       </button>
     </div>
   </div>
