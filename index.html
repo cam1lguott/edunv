@@ -140,6 +140,16 @@
       }
     }
 
+    function exitFullscreen() {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (movie.webkitDisplayingFullscreen && movie.webkitExitFullscreen) {
+        movie.webkitExitFullscreen();
+      }
+    }
+
     function playMovie(videoUrl) {
       enableAudio();
       movie.src = videoUrl;
@@ -147,6 +157,7 @@
       startScreen.hidden = true;
       movie.load();
       movie.play().catch(() => {
+        exitFullscreen();
         movie.hidden = true;
         startScreen.hidden = false;
       });
@@ -154,6 +165,7 @@
     }
 
     movie.addEventListener('error', () => {
+      exitFullscreen();
       movie.hidden = true;
       startScreen.hidden = false;
     });
