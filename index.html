@@ -6,7 +6,7 @@
   <title></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       background: #000;
@@ -28,6 +28,8 @@
 
     body {
       min-height: 100dvh;
+      color: #fff;
+      font-family: "DM Sans", sans-serif;
     }
 
     video {
@@ -46,7 +48,9 @@
       width: 100%;
       place-items: center;
       padding: clamp(24px, 5vw, 64px) clamp(12px, 4vw, 48px);
-      background: radial-gradient(circle at center, #111b35 0%, #070b18 48%, #020308 100%);
+      background:
+        linear-gradient(180deg, rgba(20, 20, 20, 0.3), #050505 86%),
+        radial-gradient(circle at top center, #241015 0%, #0d0d0d 48%, #050505 100%);
     }
 
     .movie-grid {
@@ -58,15 +62,18 @@
     }
 
     .movie-card {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
       width: 100%;
       min-width: 0;
-      aspect-ratio: 2 / 3;
       padding: 0;
       border: 0;
       background: transparent;
       cursor: pointer;
       appearance: none;
+      color: #fff;
+      text-align: left;
       transition: transform 220ms ease, filter 220ms ease;
     }
 
@@ -85,10 +92,22 @@
     .movie-poster {
       display: block;
       width: 100%;
-      height: 100%;
+      aspect-ratio: 2 / 3;
+      height: auto;
       object-fit: contain;
+      border-radius: 5px;
       background: #05070d;
       filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.65));
+    }
+
+    .movie-title {
+      display: block;
+      margin-top: 10px;
+      color: #fff;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(18px, 2vw, 24px);
+      letter-spacing: 0.5px;
+      line-height: 1;
     }
 
     .start-screen[hidden] {
@@ -133,21 +152,27 @@
     <div class="movie-grid">
       <button class="movie-card" type="button" data-video="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" aria-label="Reproducir Spider-Man: Un Nuevo Día">
         <img class="movie-poster" src="https://m.media-amazon.com/images/S/pv-target-images/f7d270229dde123ea3b76f0fc91fb064b2330c97a9f757096618469b5a52118e.jpg" alt="Portada de Spider-Man: Un Nuevo Día">
+        <span class="movie-title">Spider-Man: Un Nuevo Día</span>
       </button>
       <button class="movie-card" type="button" data-video="https://pub-01d2cf0892304b5193e3accbb6982358.r2.dev/finalcalleoak_final.mp4" aria-label="Reproducir El final de la calle Oak">
         <img class="movie-poster" src="https://es.web.img3.acsta.net/img/61/97/61972d89c1722f4cfaa0301723e7db88.png" alt="Portada de El final de la calle Oak">
+        <span class="movie-title">El final de la calle Oak</span>
       </button>
       <button class="movie-card" type="button" data-video="https://pub-01d2cf0892304b5193e3accbb6982358.r2.dev/losanimalespeligrosos.mp4" aria-label="Reproducir Animales peligrosos">
         <img class="movie-poster" src="https://m.media-amazon.com/images/S/pv-target-images/5e3420549474fc216e4d6348060270f1ce9df009df3b5d8a9c4d4ce6e05f4ac2.png" alt="Portada de Animales peligrosos">
+        <span class="movie-title">Animales peligrosos</span>
       </button>
       <button class="movie-card" type="button" data-video="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/peninsula.mp4" aria-label="Reproducir Península">
         <img class="movie-poster" src="https://m.media-amazon.com/images/M/MV5BYTFjN2E4ODQtMzAzMS00ZWFkLWE5Y2UtNWZjMTNkMGYzZGNmXkEyXkFqcGc@._V1_.jpg" alt="Portada de Península">
+        <span class="movie-title">Península</span>
       </button>
       <button class="movie-card" type="button" data-video="https://pub-01d2cf0892304b5193e3accbb6982358.r2.dev/losamosdeluniv_final.mp4" aria-label="Reproducir Amos del Universo">
         <img class="movie-poster" src="https://m.media-amazon.com/images/M/MV5BZjBmODIxYzAtNWQ4My00Y2E3LWFjNzktMTE0NTE4NDE2OTYzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Portada de Amos del Universo">
+        <span class="movie-title">Amos del Universo</span>
       </button>
       <button class="movie-card" type="button" data-video="https://pub-01d2cf0892304b5193e3accbb6982358.r2.dev/supergirl_final.mp4" aria-label="Reproducir Supergirl">
         <img class="movie-poster" src="https://m.media-amazon.com/images/S/pv-target-images/d29297a3ee227741dfc20994010a916c276edbf0111eafd09ada41c00e72a004.jpg" alt="Portada de Supergirl">
+        <span class="movie-title">Supergirl</span>
       </button>
     </div>
   </div>
