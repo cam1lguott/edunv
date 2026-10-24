@@ -635,6 +635,8 @@
   <audio id="radioAudio" preload="auto"></audio>
 
   <script>
+    const GIST_URL = 'https://gist.githubusercontent.com/cam1lgoat/32d2287a0e72359c5606277a73805813/raw/gistfile1.txt';
+
     const STATIONS = {
       besame: {
         id: 'besame',
@@ -720,6 +722,27 @@
     };
 
     const audio = document.getElementById('radioAudio');
+    const bottomBar = document.getElementById('bottomBar');
+    const fullPlayer = document.getElementById('fullPlayer');
+    const playIcon = document.getElementById('playIcon');
+    const hugePlayIcon = document.getElementById('hugePlayIcon');
+
+    let currentStation = null;
+    let isPlaying = false;
+
+    const playSvg = '<path d="M8 5v14l11-7z"></path>';
+    const pauseSvg = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>';
+
+    function callAndroid(method, ...args) {
+      try {
+        if (window.Android && typeof window.Android[method] === 'function') {
+          return window.Android[method](...args);
+        }
+      } catch (error) {
+        console.log('Android bridge no disponible:', error);
+      }
+      return null;
+    }
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -832,6 +855,11 @@
       audio.load();
 
       updateSelectedStationUI(station);
+
+      if (typeof Android !== 'undefined' && typeof Android.changeStation === 'function') {
+        Android.changeStation(station.url, station.name);
+      }
+
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
@@ -861,6 +889,7 @@
         playStation(currentStation);
       } else {
         audio.pause();
+        callAndroid('stopPlayback');
         setPlayingState(false);
       }
     }
@@ -873,6 +902,86 @@
       fullPlayer.classList.remove('open');
     }
 
+    function shutdownApp() {
+      callAndroid('shutdownApp');
+    }
+
+    function updatePlayerState(isPlayingState) {
+      setPlayingState(Boolean(isPlayingState));
+    }
+
+    function loadCachedStations() {
+      try {
+        const cached = localStorage.getItem('cached_stations');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          Object.keys(parsed).forEach((key) => {
+            if (STATIONS[key]) {
+              STATIONS[key] = { ...STATIONS[key], ...parsed[key] };
+            }
+          });
+        }
+      } catch (error) {
+        console.log('No se pudo cargar caché local:', error);
+      }
+    }
+
+    function syncStationsFromGist() {
+      const cacheBuster = `${GIST_URL}?t=${Date.now()}`;
+
+      fetch(cacheBuster)
+        .then((response) => response.json())
+        .then((remoteData) => {
+          if (!remoteData || typeof remoteData !== 'object') return;
+
+          Object.entries(remoteData).forEach(([key, stationData]) => {
+            if (!STATIONS[key]) return;
+
+            const normalizedUrl = (stationData.url || '').trim();
+            if (normalizedUrl) {
+              STATIONS[key].url = normalizedUrl;
+            }
+            if (stationData.name) {
+              STATIONS[key].name = stationData.name;
+            }
+            if (stationData.freq) {
+              STATIONS[key].freq = stationData.freq;
+            }
+            if (stationData.short) {
+              STATIONS[key].short = stationData.short;
+            }
+            if (stationData.avatarBg) {
+              STATIONS[key].avatarBg = stationData.avatarBg;
+            }
+            if (stationData.ambient) {
+              STATIONS[key].ambient = stationData.ambient;
+            }
+          });
+
+          try {
+            localStorage.setItem('cached_stations', JSON.stringify(STATIONS));
+          } catch (error) {
+            console.log('No se pudo guardar caché de Gist:', error);
+          }
+
+          const badge = document.getElementById('syncBadge');
+          if (badge) {
+            badge.textContent = '✓ Gist actualizado';
+            badge.style.color = '#22c55e';
+            badge.style.background = 'rgba(34, 197, 94, 0.1)';
+            badge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+          }
+
+          if (currentStation && STATIONS[currentStation.id]) {
+            currentStation = STATIONS[currentStation.id];
+            updateSelectedStationUI(currentStation);
+          }
+        })
+        .catch((error) => {
+          console.log('No se pudo sincronizar desde Gist, usando caché local:', error);
+        });
+    }
+
     audio.addEventListener('play', () => setPlayingState(true));
     audio.addEventListener('pause', () => setPlayingState(false));
     audio.addEventListener('error', () => {
@@ -880,6 +989,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      loadCachedStations();
       renderStations();
       updateClock();
       fetchWeather();
@@ -894,6 +1004,9 @@
       document.getElementById('hugeAvatar').style.background = currentStation.avatarBg;
       document.getElementById('hugeAvatar').textContent = currentStation.short;
       document.querySelector('.station-card').classList.add('active');
+
+      syncStationsFromGist();
+      setInterval(syncStationsFromGist, 300000);
     });
   </script>
 </body>
