@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -136,19 +136,6 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--text-muted);
-    }
-
-    .sync-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 12px;
     }
 
     .station-grid {
@@ -611,7 +598,6 @@
   <main class="content-area">
     <div class="section-header">
       <span class="section-tag">Emisoras en vivo</span>
-      <span class="sync-badge" id="syncBadge">● Gist Sync</span>
     </div>
 
     <div class="station-grid" id="stationGrid"></div>
@@ -671,7 +657,6 @@
   <audio id="radioAudio" preload="auto"></audio>
 
   <script>
-    const GIST_URL = 'https://gist.githubusercontent.com/cam1lgoat/32d2287a0e72359c5606277a73805813/raw/gistfile1.txt';
 
     const STATIONS = {
       besame: {
@@ -926,22 +911,6 @@
         console.log('No se pudo cargar caché local:', error);
       }
     }
-
-    function syncStationsFromGist() {
-      const cacheBuster = `${GIST_URL}?t=${Date.now()}`;
-
-      fetch(cacheBuster)
-        .then((response) => response.json())
-        .then((remoteData) => {
-          if (!remoteData || typeof remoteData !== 'object') return;
-
-          Object.entries(remoteData).forEach(([key, stationData]) => {
-            if (!STATIONS[key]) return;
-
-            const normalizedUrl = (stationData.url || '').trim();
-            if (normalizedUrl) {
-              STATIONS[key].url = normalizedUrl;
-            }
             if (stationData.name) {
               STATIONS[key].name = stationData.name;
             }
@@ -1001,9 +970,6 @@
       document.getElementById('hugeAvatar').style.background = currentStation.avatarBg;
       document.getElementById('hugeAvatar').textContent = currentStation.short;
       document.querySelector('.station-card').classList.add('active');
-
-      syncStationsFromGist();
-      setInterval(syncStationsFromGist, 300000);
     });
   </script>
 </body>
