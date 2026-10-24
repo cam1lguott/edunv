@@ -932,15 +932,6 @@
       loadCachedStations();
       renderStations();
 
-      currentStation = STATIONS.besame;
-      document.getElementById('barTitle').textContent = currentStation.name;
-      document.getElementById('barStatus').textContent = 'Listo para reproducir';
-      document.getElementById('barDisc').textContent = currentStation.short;
-      document.getElementById('barDisc').style.background = currentStation.avatarBg;
-      document.getElementById('hugeAvatar').style.background = currentStation.avatarBg;
-      document.getElementById('hugeAvatar').textContent = currentStation.short;
-      document.querySelector('.station-card').classList.add('active');
-
       syncStationsFromGist();
       setInterval(syncStationsFromGist, 300000);
     });
