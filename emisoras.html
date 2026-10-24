@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emibq | Emisoras de Barranquilla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      background: #071014;
+      color: #f4f7f5;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(0, 157, 154, 0.28), transparent 34%),
+        linear-gradient(145deg, #071014, #101922 58%, #172322);
+      color: #f4f7f5;
+      font-family: "DM Sans", sans-serif;
+    }
+
+    .page {
+      width: min(100% - 32px, 1120px);
+      margin: 0 auto;
+      padding: 26px 0 56px;
+    }
+
+    .back-link {
+      color: #a8d7d1;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      color: #fff;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 72px 0 34px;
+    }
+
+    h1 {
+      margin: 0;
+      color: #fff;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(54px, 10vw, 104px);
+      font-weight: 400;
+      line-height: 0.85;
+      letter-spacing: 1px;
+    }
+
+    .intro {
+      max-width: 330px;
+      margin: 0;
+      color: #b9cbc9;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .station-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .station {
+      display: flex;
+      min-height: 184px;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 22px;
+      border: 1px solid rgba(196, 232, 225, 0.15);
+      border-radius: 8px;
+      background: rgba(8, 19, 23, 0.76);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      transition: border-color 180ms ease, transform 180ms ease;
+    }
+
+    .station:hover {
+      border-color: #35c8bb;
+      transform: translateY(-4px);
+    }
+
+    .station-city {
+      color: #70d8cd;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 10px 0 22px;
+      font-size: 23px;
+      line-height: 1.05;
+    }
+
+    .listen-link {
+      align-self: flex-start;
+      padding: 10px 14px;
+      border-radius: 5px;
+      background: #d9f45f;
+      color: #10170e;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .listen-link:hover,
+    .listen-link:focus-visible {
+      background: #fff;
+      outline: none;
+    }
+
+    @media (max-width: 760px) {
+      header {
+        display: block;
+        padding-top: 54px;
+      }
+
+      .intro {
+        margin-top: 22px;
+      }
+
+      .station-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        width: min(100% - 24px, 1120px);
+      }
+
+      .station-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <a class="back-link" href="index.html">&larr; Volver a películas</a>
+    <header>
+      <h1>Emibq</h1>
+      <p class="intro">Las emisoras más escuchadas de Barranquilla, reunidas en un solo lugar.</p>
+    </header>
+
+    <section class="station-grid" aria-label="Emisoras de Barranquilla">
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Bésame</h2></div>
+        <a class="listen-link" href="https://www.besame.fm/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>La Reina</h2></div>
+        <a class="listen-link" href="https://www.lareina.com.co/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Radio Tiempo</h2></div>
+        <a class="listen-link" href="https://www.radiotiempo.co/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Olímpica Stereo</h2></div>
+        <a class="listen-link" href="https://www.olimpicastereo.com.co/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Tropicana</h2></div>
+        <a class="listen-link" href="https://www.tropicanafm.com/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Vallenata Stereo</h2></div>
+        <a class="listen-link" href="https://www.vallenatastereo.com/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Mix 103.9</h2></div>
+        <a class="listen-link" href="https://www.mixradio.co/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>La Mega</h2></div>
+        <a class="listen-link" href="https://www.lamega.com.co/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+      <article class="station">
+        <div><span class="station-city">Barranquilla</span><h2>Latina Stereo</h2></div>
+        <a class="listen-link" href="https://latinastereo.com/" target="_blank" rel="noopener">Escuchar</a>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
