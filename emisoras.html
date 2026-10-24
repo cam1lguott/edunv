@@ -64,8 +64,8 @@
       z-index: 30;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: calc(14px + var(--safe-top)) 20px 12px;
+      justify-content: flex-start;
+      padding: calc(12px + var(--safe-top)) 16px 10px;
       background: rgba(9, 10, 15, 0.78);
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(18px);
@@ -75,11 +75,12 @@
     .brand-box {
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
     }
 
     .brand-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
@@ -91,9 +92,9 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.72rem;
+      font-size: 0.66rem;
       font-weight: 600;
-      letter-spacing: 1.2px;
+      letter-spacing: 0.9px;
       text-transform: uppercase;
       color: var(--text-muted);
     }
@@ -112,38 +113,13 @@
       50% { opacity: 0.45; transform: scale(0.85); }
     }
 
-    .header-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 12px;
-      background: var(--surface-1);
-      border: 1px solid var(--border-glass);
-      border-radius: 20px;
-      font-size: 0.8rem;
-      color: #cbd5e1;
-    }
-
-    .weather-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 700;
-      color: #facc15;
-    }
-
-    .time-pill {
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-    }
-
     .content-area {
       position: relative;
       z-index: 1;
-      max-width: 560px;
+      max-width: 520px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px 16px 0;
+      padding: 18px 14px 0;
     }
 
     .section-header {
@@ -552,8 +528,30 @@
     }
 
     @media (max-width: 480px) {
+      body {
+        padding-bottom: calc(104px + var(--safe-bottom));
+      }
+
+      .content-area {
+        padding-top: 14px;
+      }
+
       .station-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .station-card {
+        min-height: 118px;
+        padding: 14px;
+      }
+
+      .bar-title {
+        font-size: 0.88rem;
+      }
+
+      .bar-status {
+        font-size: 0.68rem;
       }
     }
   </style>
@@ -565,10 +563,6 @@
     <div class="brand-box">
       <span class="brand-title">Emibq</span>
       <span class="brand-sub"><span class="live-dot"></span> Barranquilla FM</span>
-    </div>
-    <div class="header-info">
-      <div class="weather-pill" id="weather"><span>⚡</span> <span id="temp">...</span></div>
-      <div class="time-pill" id="clock">--:--</div>
     </div>
   </header>
 
@@ -783,31 +777,6 @@
       });
     }
 
-    function updateClock() {
-      const now = new Date();
-      const bogotaTime = now.toLocaleString('en-US', {
-        timeZone: 'America/Bogota',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-      document.getElementById('clock').textContent = bogotaTime;
-    }
-
-    function fetchWeather() {
-      fetch('https://api.open-meteo.com/v1/forecast?latitude=10.9965&longitude=-74.7889&current_weather=true&temperature_unit=celsius')
-        .then((response) => response.json())
-        .then((data) => {
-          if (data && data.current_weather) {
-            const temp = Math.round(data.current_weather.temperature);
-            document.getElementById('temp').textContent = `${temp}°C`;
-          }
-        })
-        .catch(() => {
-          document.getElementById('temp').textContent = '30°C';
-        });
-    }
-
     function setPlayingState(playing) {
       isPlaying = playing;
 
@@ -991,10 +960,6 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadCachedStations();
       renderStations();
-      updateClock();
-      fetchWeather();
-      setInterval(updateClock, 1000);
-      setInterval(fetchWeather, 600000);
 
       currentStation = STATIONS.besame;
       document.getElementById('barTitle').textContent = currentStation.name;
