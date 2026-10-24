@@ -2,151 +2,556 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Emibq | Emisoras de Barranquilla</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      background: #071014;
-      color: #f4f7f5;
-      color-scheme: dark;
+      --bg-base: #090a0f;
+      --surface-1: rgba(255, 255, 255, 0.05);
+      --surface-2: rgba(255, 255, 255, 0.08);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
     }
 
     body {
       min-height: 100vh;
-      margin: 0;
+      padding-bottom: calc(112px + var(--safe-bottom));
       background:
-        radial-gradient(circle at 12% 0%, rgba(0, 157, 154, 0.28), transparent 34%),
-        linear-gradient(145deg, #071014, #101922 58%, #172322);
-      color: #f4f7f5;
-      font-family: "DM Sans", sans-serif;
+        radial-gradient(circle at 15% 15%, rgba(255, 42, 95, 0.18), transparent 32%),
+        radial-gradient(circle at 80% 18%, rgba(56, 189, 248, 0.12), transparent 32%),
+        linear-gradient(180deg, #090a0f 0%, #0f172a 100%);
     }
 
-    .page {
-      width: min(100% - 32px, 1120px);
-      margin: 0 auto;
-      padding: 26px 0 56px;
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 54% 28%, rgba(250, 204, 21, 0.14), transparent 28%),
+        radial-gradient(circle at 18% 70%, rgba(14, 165, 233, 0.14), transparent 25%),
+        linear-gradient(180deg, rgba(9,10,15,0.3), rgba(9,10,15,0.9));
+      transition: all 0.5s ease;
     }
 
-    .back-link {
-      color: #a8d7d1;
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .back-link:hover,
-    .back-link:focus-visible {
-      color: #fff;
-    }
-
-    header {
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
       display: flex;
-      align-items: end;
+      align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      padding: 72px 0 34px;
+      padding: calc(14px + var(--safe-top)) 20px 12px;
+      background: rgba(9, 10, 15, 0.78);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
-    h1 {
-      margin: 0;
-      color: #fff;
-      font-family: "Bebas Neue", sans-serif;
-      font-size: clamp(54px, 10vw, 104px);
-      font-weight: 400;
-      line-height: 0.85;
+    .brand-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulse-live 1.8s infinite;
+    }
+
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    .weather-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 700;
+      color: #facc15;
+    }
+
+    .time-pill {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .content-area {
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .section-tag {
+      font-size: 0.76rem;
+      font-weight: 700;
       letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
 
-    .intro {
-      max-width: 330px;
-      margin: 0;
-      color: #b9cbc9;
-      font-size: 15px;
-      line-height: 1.5;
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
     }
 
     .station-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
+      margin-bottom: 24px;
     }
 
-    .station {
+    .station-card {
+      position: relative;
       display: flex;
-      min-height: 184px;
       flex-direction: column;
       justify-content: space-between;
-      padding: 22px;
-      border: 1px solid rgba(196, 232, 225, 0.15);
-      border-radius: 8px;
-      background: rgba(8, 19, 23, 0.76);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
-      transition: border-color 180ms ease, transform 180ms ease;
+      min-height: 130px;
+      padding: 16px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .station:hover {
-      border-color: #35c8bb;
-      transform: translateY(-4px);
+    .station-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      padding: 1.5px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 60%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
     }
 
-    .station-city {
-      color: #70d8cd;
-      font-size: 12px;
+    .station-card:active {
+      transform: scale(0.96);
+      background: var(--surface-2);
+    }
+
+    .station-card.active {
+      border-color: rgba(255, 255, 255, 0.45);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .station-avatar {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-wave {
+      display: flex;
+      align-items: flex-end;
+      gap: 2.5px;
+      height: 18px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .station-card.active .card-wave {
+      opacity: 1;
+    }
+
+    .wave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: white;
+      animation: bounce-bar 1.2s infinite ease-in-out;
+    }
+
+    .wave-bar:nth-child(1) { height: 60%; animation-delay: 0.1s; }
+    .wave-bar:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+    .wave-bar:nth-child(3) { height: 45%; animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { height: 80%; animation-delay: 0.4s; }
+
+    @keyframes bounce-bar {
+      0%, 100% { transform: scaleY(0.4); }
+      50% { transform: scaleY(1); }
+    }
+
+    .card-bottom {
+      margin-top: 14px;
+    }
+
+    .card-name {
+      margin-bottom: 3px;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: -0.3px;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .card-freq {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
+      color: var(--text-secondary);
     }
 
-    h2 {
-      margin: 10px 0 22px;
-      font-size: 23px;
-      line-height: 1.05;
-    }
-
-    .listen-link {
-      align-self: flex-start;
+    .bottom-player-bar {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: calc(14px + var(--safe-bottom));
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 540px;
+      margin: 0 auto;
       padding: 10px 14px;
-      border-radius: 5px;
-      background: #d9f45f;
-      color: #10170e;
-      font-size: 13px;
+      background: rgba(18, 20, 29, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .bar-disc {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: #252836;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      animation: rotate-disc 12s linear infinite;
+      animation-play-state: paused;
+      flex-shrink: 0;
+    }
+
+    .bottom-player-bar.playing .bar-disc {
+      animation-play-state: running;
+    }
+
+    @keyframes rotate-disc {
+      100% { transform: rotate(360deg); }
+    }
+
+    .bar-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .bar-title {
+      font-size: 0.95rem;
       font-weight: 700;
-      text-decoration: none;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .listen-link:hover,
-    .listen-link:focus-visible {
+    .bar-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .bar-controls {
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+    }
+
+    .control-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border-glass);
+      border-radius: 50%;
+      background: var(--surface-2);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:active {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .control-btn.play-main {
+      width: 48px;
+      height: 48px;
+      border: none;
       background: #fff;
-      outline: none;
+      color: #090a0f;
+      box-shadow: 0 4px 16px rgba(255,255,255,0.3);
     }
 
-    @media (max-width: 760px) {
-      header {
-        display: block;
-        padding-top: 54px;
-      }
+    .control-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
 
-      .intro {
-        margin-top: 22px;
-      }
+    .full-player-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: calc(24px + var(--safe-top)) 28px calc(36px + var(--safe-bottom));
+      background: rgba(9, 10, 15, 0.96);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      transform: translateY(105%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-      .station-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .full-player-overlay.open {
+      transform: translateY(0);
+    }
+
+    .overlay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .close-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-glass);
+      border-radius: 50%;
+      background: var(--surface-2);
+      color: white;
+      cursor: pointer;
+    }
+
+    .overlay-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .huge-station-avatar {
+      width: 170px;
+      height: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 40px;
+      font-size: 3.5rem;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      color: white;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      margin-bottom: 28px;
+    }
+
+    .huge-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .huge-freq {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .overlay-visualizer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      margin-top: 24px;
+    }
+
+    .viz-bar {
+      width: 5px;
+      height: 10px;
+      border-radius: 3px;
+      background: white;
+      animation: pulse-viz 1.2s infinite ease-in-out;
+    }
+
+    .full-player-overlay.playing .viz-bar:nth-child(1) { animation-duration: 0.8s; }
+    .full-player-overlay.playing .viz-bar:nth-child(2) { animation-duration: 1.1s; }
+    .full-player-overlay.playing .viz-bar:nth-child(3) { animation-duration: 0.7s; }
+    .full-player-overlay.playing .viz-bar:nth-child(4) { animation-duration: 1.3s; }
+    .full-player-overlay.playing .viz-bar:nth-child(5) { animation-duration: 0.9s; }
+    .full-player-overlay.playing .viz-bar:nth-child(6) { animation-duration: 1.2s; }
+    .full-player-overlay.playing .viz-bar:nth-child(7) { animation-duration: 0.75s; }
+
+    @keyframes pulse-viz {
+      0%, 100% { height: 8px; opacity: 0.4; }
+      50% { height: 34px; opacity: 1; }
+    }
+
+    .overlay-footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .big-play-btn {
+      width: 76px;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255,255,255,0.25);
+    }
+
+    .big-play-btn svg {
+      width: 32px;
+      height: 32px;
+      fill: currentColor;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      margin: 16px 0 0 14px;
+      color: #dbeafe;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
     }
 
     @media (max-width: 480px) {
-      .page {
-        width: min(100% - 24px, 1120px);
-      }
-
       .station-grid {
         grid-template-columns: 1fr;
       }
@@ -154,51 +559,342 @@
   </style>
 </head>
 <body>
-  <main class="page">
-    <a class="back-link" href="index.html">&larr; Volver a películas</a>
-    <header>
-      <h1>Emibq</h1>
-      <p class="intro">Las emisoras más escuchadas de Barranquilla, reunidas en un solo lugar.</p>
-    </header>
+  <div class="ambient-bg" id="ambientBg"></div>
 
-    <section class="station-grid" aria-label="Emisoras de Barranquilla">
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Bésame</h2></div>
-        <a class="listen-link" href="https://www.besame.fm/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>La Reina</h2></div>
-        <a class="listen-link" href="https://www.lareina.com.co/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Radio Tiempo</h2></div>
-        <a class="listen-link" href="https://www.radiotiempo.co/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Olímpica Stereo</h2></div>
-        <a class="listen-link" href="https://www.olimpicastereo.com.co/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Tropicana</h2></div>
-        <a class="listen-link" href="https://www.tropicanafm.com/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Vallenata Stereo</h2></div>
-        <a class="listen-link" href="https://www.vallenatastereo.com/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Mix 103.9</h2></div>
-        <a class="listen-link" href="https://www.mixradio.co/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>La Mega</h2></div>
-        <a class="listen-link" href="https://www.lamega.com.co/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-      <article class="station">
-        <div><span class="station-city">Barranquilla</span><h2>Latina Stereo</h2></div>
-        <a class="listen-link" href="https://latinastereo.com/" target="_blank" rel="noopener">Escuchar</a>
-      </article>
-    </section>
+  <header class="app-header">
+    <div class="brand-box">
+      <span class="brand-title">Emibq</span>
+      <span class="brand-sub"><span class="live-dot"></span> Barranquilla FM</span>
+    </div>
+    <div class="header-info">
+      <div class="weather-pill" id="weather"><span>⚡</span> <span id="temp">...</span></div>
+      <div class="time-pill" id="clock">--:--</div>
+    </div>
+  </header>
+
+  <main class="content-area">
+    <div class="section-header">
+      <span class="section-tag">Emisoras en vivo</span>
+      <span class="sync-badge" id="syncBadge">● Gist Sync</span>
+    </div>
+
+    <div class="station-grid" id="stationGrid"></div>
   </main>
+
+  <div class="bottom-player-bar" id="bottomBar" onclick="openPlayer()">
+    <div class="bar-left">
+      <div class="bar-disc" id="barDisc">📻</div>
+      <div class="bar-info">
+        <span class="bar-title" id="barTitle">Toca una emisora</span>
+        <span class="bar-status" id="barStatus">Listo para reproducir</span>
+      </div>
+    </div>
+    <div class="bar-controls" onclick="event.stopPropagation()">
+      <button class="control-btn play-main" id="btnPlayMain" type="button" onclick="togglePlayPause()">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="full-player-overlay" id="fullPlayer">
+    <div class="overlay-header">
+      <button class="close-btn" type="button" onclick="closePlayer()" aria-label="Cerrar reproductor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <span style="font-size:0.85rem; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">Reproduciendo ahora</span>
+      <div style="width:40px;"></div>
+    </div>
+
+    <div class="overlay-center">
+      <div class="huge-station-avatar" id="hugeAvatar">📻</div>
+      <h2 class="huge-name" id="hugeName">Emisora</h2>
+      <p class="huge-freq" id="hugeFreq">Barranquilla, Colombia</p>
+
+      <div class="overlay-visualizer" aria-hidden="true">
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+      </div>
+    </div>
+
+    <div class="overlay-footer">
+      <button class="big-play-btn" type="button" onclick="togglePlayPause()" aria-label="Pausar o reproducir">
+        <svg id="hugePlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <a class="back-link" href="index.html">&larr; Volver a películas</a>
+
+  <audio id="radioAudio" preload="auto"></audio>
+
+  <script>
+    const STATIONS = {
+      besame: {
+        id: 'besame',
+        name: 'Bésame',
+        freq: '88.6 FM',
+        short: 'BS',
+        avatarBg: 'linear-gradient(135deg, #ff1744, #e91e63)',
+        ambient: 'rgba(255, 23, 68, 0.28)',
+        url: 'https://27353.live.streamtheworld.com/BESAME_BARRANQUILLAAAC.aac'
+      },
+      reina: {
+        id: 'reina',
+        name: 'La Reina',
+        freq: '98.6 FM',
+        short: 'RN',
+        avatarBg: 'linear-gradient(135deg, #ca8a04, #a16207)',
+        ambient: 'rgba(202, 138, 4, 0.25)',
+        url: 'https://26483.live.streamtheworld.com/RNA_BARRANQUILLAAAC.aac?dist=oro_web'
+      },
+      radiotiempo: {
+        id: 'radiotiempo',
+        name: 'Radio Tiempo',
+        freq: '96.1 FM',
+        short: 'RT',
+        avatarBg: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+        ambient: 'rgba(14, 165, 233, 0.25)',
+        url: 'https://20603.live.streamtheworld.com:443/RT_BARRANQUILLAAAC.aac'
+      },
+      olimpica: {
+        id: 'olimpica',
+        name: 'Olímpica Stereo',
+        freq: '92.1 FM',
+        short: 'OP',
+        avatarBg: 'linear-gradient(135deg, #e11d48, #be123c)',
+        ambient: 'rgba(225, 29, 72, 0.25)',
+        url: 'https://26493.live.streamtheworld.com/OLP_BARRANQUILLAAAC.aac?dist=oro_web'
+      },
+      tropicana: {
+        id: 'tropicana',
+        name: 'Tropicana',
+        freq: '89.1 FM',
+        short: 'TR',
+        avatarBg: 'linear-gradient(135deg, #fbbf24, #f97316)',
+        ambient: 'rgba(251, 191, 36, 0.25)',
+        url: 'https://24273.live.streamtheworld.com/TR_BARRANQUILLAAAC.aac'
+      },
+      vallenata: {
+        id: 'vallenata',
+        name: 'Vallenata Stereo',
+        freq: 'Online',
+        short: 'VN',
+        avatarBg: 'linear-gradient(135deg, #f97316, #ea580c)',
+        ambient: 'rgba(249, 115, 22, 0.25)',
+        url: 'https://stream.zeno.fm/9mpfs57pnc9uv'
+      },
+      mix: {
+        id: 'mix',
+        name: 'Mix 103.9',
+        freq: '103.9 FM',
+        short: 'MX',
+        avatarBg: 'linear-gradient(135deg, #10b981, #059669)',
+        ambient: 'rgba(16, 185, 129, 0.25)',
+        url: 'https://26483.live.streamtheworld.com/MIX_BARRANQUILLAAAC.aac?dist=oro_web'
+      },
+      lamega: {
+        id: 'lamega',
+        name: 'La Mega',
+        freq: '93.1 FM',
+        short: 'MG',
+        avatarBg: 'linear-gradient(135deg, #a855f7, #7e22ce)',
+        ambient: 'rgba(168, 85, 247, 0.25)',
+        url: 'https://mdstrm.com/audio/632cbad6d1dcd7027f32fff6/icecast.audio'
+      },
+      latina: {
+        id: 'latina',
+        name: 'Latina Stereo',
+        freq: 'Online',
+        short: 'LT',
+        avatarBg: 'linear-gradient(135deg, #0284c7, #0369a1)',
+        ambient: 'rgba(2, 132, 199, 0.25)',
+        url: 'https://stream.zeno.fm/eg2xac4dazzuv'
+      }
+    };
+
+    const audio = document.getElementById('radioAudio');
+    const bottomBar = document.getElementById('bottomBar');
+    const fullPlayer = document.getElementById('fullPlayer');
+    const playIcon = document.getElementById('playIcon');
+    const hugePlayIcon = document.getElementById('hugePlayIcon');
+
+    let currentStation = null;
+    let isPlaying = false;
+
+    const playSvg = '<path d="M8 5v14l11-7z"></path>';
+    const pauseSvg = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>';
+
+    function renderStations() {
+      const grid = document.getElementById('stationGrid');
+      grid.innerHTML = '';
+
+      Object.values(STATIONS).forEach((station) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `station-card ${currentStation && currentStation.id === station.id ? 'active' : ''}`;
+        card.setAttribute('aria-label', `Escuchar ${station.name}`);
+        card.onclick = () => selectStation(station.id);
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="station-avatar" style="background: ${station.avatarBg};">${station.short}</div>
+            <div class="card-wave" aria-hidden="true">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <div class="card-name">${station.name}</div>
+            <div class="card-freq">${station.freq}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const bogotaTime = now.toLocaleString('en-US', {
+        timeZone: 'America/Bogota',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      document.getElementById('clock').textContent = bogotaTime;
+    }
+
+    function fetchWeather() {
+      fetch('https://api.open-meteo.com/v1/forecast?latitude=10.9965&longitude=-74.7889&current_weather=true&temperature_unit=celsius')
+        .then((response) => response.json())
+        .then((data) => {
+          if (data && data.current_weather) {
+            const temp = Math.round(data.current_weather.temperature);
+            document.getElementById('temp').textContent = `${temp}°C`;
+          }
+        })
+        .catch(() => {
+          document.getElementById('temp').textContent = '30°C';
+        });
+    }
+
+    function setPlayingState(playing) {
+      isPlaying = playing;
+
+      if (playing) {
+        bottomBar.classList.add('playing');
+        fullPlayer.classList.add('playing');
+        playIcon.innerHTML = pauseSvg;
+        hugePlayIcon.innerHTML = pauseSvg;
+        document.getElementById('barStatus').textContent = `En vivo • ${currentStation ? currentStation.freq : ''}`;
+      } else {
+        bottomBar.classList.remove('playing');
+        fullPlayer.classList.remove('playing');
+        playIcon.innerHTML = playSvg;
+        hugePlayIcon.innerHTML = playSvg;
+        document.getElementById('barStatus').textContent = 'Pausado';
+      }
+    }
+
+    function updateSelectedStationUI(station) {
+      document.getElementById('barTitle').textContent = station.name;
+      document.getElementById('barStatus').textContent = `En vivo • ${station.freq}`;
+      document.getElementById('barDisc').textContent = station.short;
+      document.getElementById('barDisc').style.background = station.avatarBg;
+      document.getElementById('hugeName').textContent = station.name;
+      document.getElementById('hugeFreq').textContent = `Barranquilla • ${station.freq}`;
+      document.getElementById('hugeAvatar').textContent = station.short;
+      document.getElementById('hugeAvatar').style.background = station.avatarBg;
+      document.getElementById('ambientBg').style.background = `
+        radial-gradient(circle at 50% 20%, ${station.ambient} 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(9,10,15,0.9) 0%, transparent 50%),
+        linear-gradient(180deg, rgba(9,10,15,0.2), rgba(9,10,15,0.8))
+      `;
+
+      document.querySelectorAll('.station-card').forEach((card) => {
+        const active = card.textContent.includes(station.name);
+        card.classList.toggle('active', active);
+      });
+    }
+
+    function playStation(station) {
+      if (!station) return;
+
+      currentStation = station;
+      audio.src = station.url;
+      audio.load();
+
+      updateSelectedStationUI(station);
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(() => {
+          setPlayingState(true);
+        }).catch(() => {
+          setPlayingState(false);
+        });
+      }
+    }
+
+    function selectStation(stationId) {
+      const station = STATIONS[stationId];
+      if (!station) return;
+
+      currentStation = station;
+      updateSelectedStationUI(station);
+      playStation(station);
+    }
+
+    function togglePlayPause() {
+      if (!currentStation) {
+        selectStation('besame');
+        return;
+      }
+
+      if (audio.paused) {
+        playStation(currentStation);
+      } else {
+        audio.pause();
+        setPlayingState(false);
+      }
+    }
+
+    function openPlayer() {
+      fullPlayer.classList.add('open');
+    }
+
+    function closePlayer() {
+      fullPlayer.classList.remove('open');
+    }
+
+    audio.addEventListener('play', () => setPlayingState(true));
+    audio.addEventListener('pause', () => setPlayingState(false));
+    audio.addEventListener('error', () => {
+      document.getElementById('barStatus').textContent = 'No se pudo cargar la emisora';
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStations();
+      updateClock();
+      fetchWeather();
+      setInterval(updateClock, 1000);
+      setInterval(fetchWeather, 600000);
+
+      currentStation = STATIONS.besame;
+      document.getElementById('barTitle').textContent = currentStation.name;
+      document.getElementById('barStatus').textContent = 'Listo para reproducir';
+      document.getElementById('barDisc').textContent = currentStation.short;
+      document.getElementById('barDisc').style.background = currentStation.avatarBg;
+      document.getElementById('hugeAvatar').style.background = currentStation.avatarBg;
+      document.getElementById('hugeAvatar').textContent = currentStation.short;
+      document.querySelector('.station-card').classList.add('active');
+    });
+  </script>
 </body>
 </html>
