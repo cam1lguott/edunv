@@ -53,18 +53,12 @@
         radial-gradient(circle at top center, #241015 0%, #0d0d0d 48%, #050505 100%);
     }
 
-    .top-nav {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      z-index: 10;
-    }
-
     .radio-link {
       display: inline-flex;
       align-items: center;
-      min-height: 42px;
-      padding: 0 18px;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 20px 0 12px;
       border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 999px;
       background: rgba(15, 15, 15, 0.9);
@@ -82,6 +76,20 @@
       background: #e31b23;
       outline: none;
       transform: translateY(-2px);
+    }
+
+    .radio-logo {
+      display: block;
+      width: 30px;
+      height: 30px;
+    }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: center;
+      width: min(100%, 1180px);
+      margin: clamp(34px, 7vw, 72px) auto 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
     }
 
     .movie-grid {
@@ -162,6 +170,10 @@
         padding: 24px 14px 36px;
       }
 
+      .bottom-nav {
+        margin-top: 38px;
+      }
+
       .movie-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px 12px;
@@ -180,9 +192,6 @@
 </head>
 <body>
   <div class="start-screen" id="startScreen">
-    <nav class="top-nav" aria-label="Navegación principal">
-      <a class="radio-link" href="emisoras.html">Emibq</a>
-    </nav>
     <div class="movie-grid">
       <button class="movie-card" type="button" data-video="https://pub-9e78b582ad5f47edadd7b3118bd5eda3.r2.dev/Spider.Man.Dual-Lat.mp4" aria-label="Reproducir Spider-Man: Un Nuevo Día">
         <img class="movie-poster" src="https://m.media-amazon.com/images/S/pv-target-images/f7d270229dde123ea3b76f0fc91fb064b2330c97a9f757096618469b5a52118e.jpg" alt="Portada de Spider-Man: Un Nuevo Día">
@@ -233,6 +242,12 @@
         <span class="movie-title">Los Vengadores</span>
       </button>
     </div>
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <a class="radio-link" href="emisoras.html">
+        <img class="radio-logo" src="logo-emibq.svg" alt="">
+        <span>Emibq</span>
+      </a>
+    </nav>
   </div>
 
   <video id="movie" controls playsinline preload="metadata" hidden>
