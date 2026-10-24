@@ -56,9 +56,10 @@
     .radio-link {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      min-height: 48px;
-      padding: 0 20px 0 12px;
+      justify-content: center;
+      width: 58px;
+      height: 58px;
+      padding: 4px;
       border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 999px;
       background: rgba(15, 15, 15, 0.9);
@@ -80,8 +81,13 @@
 
     .radio-logo {
       display: block;
-      width: 30px;
-      height: 30px;
+      width: 48px;
+      height: 48px;
+      padding: 5px;
+      border: 2px solid rgba(255, 255, 255, 0.82);
+      border-radius: 50%;
+      background: #fff;
+      object-fit: contain;
     }
 
     .bottom-nav {
@@ -243,9 +249,8 @@
       </button>
     </div>
     <nav class="bottom-nav" aria-label="Navegación principal">
-      <a class="radio-link" href="emisoras.html">
-        <img class="radio-logo" src="logo-emibq.svg" alt="">
-        <span>Emibq</span>
+      <a class="radio-link" href="emisoras.html" aria-label="Abrir Emibq">
+        <img class="radio-logo" src="emibqn.png" alt="Logo de Emibq">
       </a>
     </nav>
   </div>
