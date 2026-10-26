@@ -714,52 +714,6 @@
     };
 
     const audio = document.getElementById('radioAudio');
-    audio.crossOrigin = 'anonymous';
-
-    let audioCtx = null;
-    let preGainNode = null;
-    let compressorNode = null;
-    let postGainNode = null;
-
-    function initCleanGain() {
-      if (audioCtx) {
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        return;
-      }
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        audioCtx = new AudioCtx();
-        const source = audioCtx.createMediaElementSource(audio);
-
-        // Paso 1: Preamplificación fuerte (2.4x / +7.6 dB) - la que sonó realmente duro
-        preGainNode = audioCtx.createGain();
-        preGainNode.gain.setValueAtTime(2.4, audioCtx.currentTime);
-
-        // Paso 2: Compresor/Limitador de estudio ajustado al techo de 0 dB
-        // Ataja de inmediato cualquier pico para que NO sature
-        compressorNode = audioCtx.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-6.0, audioCtx.currentTime);
-        compressorNode.knee.setValueAtTime(10.0, audioCtx.currentTime);
-        compressorNode.ratio.setValueAtTime(16.0, audioCtx.currentTime); // Limitación firme
-        compressorNode.attack.setValueAtTime(0.002, audioCtx.currentTime); // Reacción en 2ms
-        compressorNode.release.setValueAtTime(0.08, audioCtx.currentTime);
-
-        // Paso 3: Ganancia de salida a 0.90 (-1 dB) para dejar margen seguro contra clipping
-        postGainNode = audioCtx.createGain();
-        postGainNode.gain.setValueAtTime(0.90, audioCtx.currentTime);
-
-        // Cadena: Audio -> Ganancia Fuerte (2.4x) -> Limitador Firme -> Margen de Techo (-1dB) -> Altavoces
-        source.connect(preGainNode);
-        preGainNode.connect(compressorNode);
-        compressorNode.connect(postGainNode);
-        postGainNode.connect(audioCtx.destination);
-      } catch (e) {
-        console.log('Gain init error:', e);
-      }
-    }
 
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
@@ -854,7 +808,6 @@
       if (!station) return;
 
       currentStation = station;
-      initCleanGain();
       audio.src = station.url;
       audio.load();
 
@@ -864,9 +817,6 @@
         Android.changeStation(station.url, station.name);
       }
 
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
