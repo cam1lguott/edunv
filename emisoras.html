@@ -736,20 +736,29 @@
         audioCtx = new AudioContextClass();
         audioSource = audioCtx.createMediaElementSource(audio);
 
-        // Limitador Dinámico (DynamicsCompressor) para evitar distorsión/clipping
-        compressorNode = audioCtx.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
-        compressorNode.knee.setValueAtTime(2.0, audioCtx.currentTime);
-        compressorNode.ratio.setValueAtTime(12.0, audioCtx.currentTime);
-        compressorNode.attack.setValueAtTime(0.002, audioCtx.currentTime);
-        compressorNode.release.setValueAtTime(0.15, audioCtx.currentTime);
+        // Etapa 1: Compresor Dinámico (empareja armónicos y eleva frecuencias medias/voces)
+        const mainCompressor = audioCtx.createDynamicsCompressor();
+        mainCompressor.threshold.setValueAtTime(-16.0, audioCtx.currentTime);
+        mainCompressor.knee.setValueAtTime(6.0, audioCtx.currentTime);
+        mainCompressor.ratio.setValueAtTime(4.0, audioCtx.currentTime);
+        mainCompressor.attack.setValueAtTime(0.005, audioCtx.currentTime);
+        mainCompressor.release.setValueAtTime(0.10, audioCtx.currentTime);
 
-        // Ganancia doble (+6.5 dB -> multiplicador 2.1x)
+        // Etapa 2: Pre-amplificador de alta potencia (3.2x de ganancia / +10.1 dB)
         gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(2.1, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(3.2, audioCtx.currentTime);
 
-        // Conectar: Audio -> Ganancia (+doble volumen) -> Limitador -> Altavoces
-        audioSource.connect(gainNode);
+        // Etapa 3: Limitador Brickwall estricto (corta a -0.3 dBFS para cero saturación/cero clipping)
+        compressorNode = audioCtx.createDynamicsCompressor();
+        compressorNode.threshold.setValueAtTime(-0.3, audioCtx.currentTime);
+        compressorNode.knee.setValueAtTime(0.0, audioCtx.currentTime);
+        compressorNode.ratio.setValueAtTime(20.0, audioCtx.currentTime);
+        compressorNode.attack.setValueAtTime(0.001, audioCtx.currentTime);
+        compressorNode.release.setValueAtTime(0.08, audioCtx.currentTime);
+
+        // Cadena de audio: Audio -> Compresor Musical -> Ganancia Ultra -> Limitador de Techo -> Altavoces
+        audioSource.connect(mainCompressor);
+        mainCompressor.connect(gainNode);
         gainNode.connect(compressorNode);
         compressorNode.connect(audioCtx.destination);
       } catch (e) {
