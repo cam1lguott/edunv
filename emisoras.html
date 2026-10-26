@@ -736,42 +736,42 @@
         audioCtx = new AudioContextClass();
         audioSource = audioCtx.createMediaElementSource(audio);
 
-        // Curva sigmoide suave de Soft-Clipping (simula saturación de cinta/tubos analógicos, eliminando distorsión digital)
-        function makeSoftCurve(amount) {
-          const k = typeof amount === 'number' ? amount : 2;
-          const n_samples = 44100;
-          const curve = new Float32Array(n_samples);
-          const deg = Math.PI / 180;
-          for (let i = 0; i < n_samples; ++i) {
-            let x = (i * 2) / n_samples - 1;
-            curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x * 20 * deg));
-          }
-          return curve;
+        // Curva sigmoide asimétrica suave (Soft-Knee Tanh) para absorción natural de picos
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        for (let i = 0; i < n_samples; ++i) {
+          let x = (i * 2) / n_samples - 1;
+          curve[i] = Math.tanh(x);
         }
 
-        const softClipper = audioCtx.createWaveShaper();
-        softClipper.curve = makeSoftCurve(0.5);
-        softClipper.oversample = '4x'; // Antialiasing de alta calidad
+        const waveShaper = audioCtx.createWaveShaper();
+        waveShaper.curve = curve;
+        waveShaper.oversample = '4x';
 
-        // Preamplificador limpio calibrado a 1.65x (+4.3 dB)
+        // Pre-Gain Potente (+7.4 dB / 2.35x de amplificación)
         gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(1.65, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(2.35, audioCtx.currentTime);
 
-        // Compresor transparente de transmisión
+        // Compresor de Broadcast (Estilo radio FM profesional)
         compressorNode = audioCtx.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-5.0, audioCtx.currentTime);
-        compressorNode.knee.setValueAtTime(12.0, audioCtx.currentTime);
-        compressorNode.ratio.setValueAtTime(3.5, audioCtx.currentTime);
-        compressorNode.attack.setValueAtTime(0.008, audioCtx.currentTime);
-        compressorNode.release.setValueAtTime(0.20, audioCtx.currentTime);
+        compressorNode.threshold.setValueAtTime(-10.0, audioCtx.currentTime);
+        compressorNode.knee.setValueAtTime(8.0, audioCtx.currentTime);
+        compressorNode.ratio.setValueAtTime(6.0, audioCtx.currentTime);
+        compressorNode.attack.setValueAtTime(0.003, audioCtx.currentTime);
+        compressorNode.release.setValueAtTime(0.12, audioCtx.currentTime);
 
-        // Cadena Hi-Fi: Fuente -> Gain Limpio -> Compresor Transparente -> Soft Clipper Analógico -> Destino
+        // Post-Gain para empuje final nítido (1.15x)
+        const postGain = audioCtx.createGain();
+        postGain.gain.setValueAtTime(1.15, audioCtx.currentTime);
+
+        // Cadena: Audio -> PreGain -> Compresor -> Tanh Limiter -> PostGain -> Salida
         audioSource.connect(gainNode);
         gainNode.connect(compressorNode);
-        compressorNode.connect(softClipper);
-        softClipper.connect(audioCtx.destination);
+        compressorNode.connect(waveShaper);
+        waveShaper.connect(postGain);
+        postGain.connect(audioCtx.destination);
       } catch (e) {
-        console.log('Web Audio Boost init error:', e);
+        console.log('Web Audio Boost error:', e);
       }
     }
     const bottomBar = document.getElementById('bottomBar');
