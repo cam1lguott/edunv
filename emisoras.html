@@ -715,6 +715,45 @@
 
     const audio = document.getElementById('radioAudio');
 
+    // Reproductor secundario de respaldo infalible (sin CORS)
+    const fallbackAudio = new Audio();
+
+    let audioCtx = null;
+    let boostGain = null;
+    let limiter = null;
+    let boostPipelineReady = false;
+
+    function initAudioDSP() {
+      if (boostPipelineReady) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        audioCtx = new AudioCtx();
+
+        audio.crossOrigin = 'anonymous';
+        const source = audioCtx.createMediaElementSource(audio);
+
+        // Limitador anti-saturación para que el audio no se rompa
+        limiter = audioCtx.createDynamicsCompressor();
+        limiter.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
+        limiter.knee.setValueAtTime(3.0, audioCtx.currentTime);
+        limiter.ratio.setValueAtTime(16.0, audioCtx.currentTime);
+        limiter.attack.setValueAtTime(0.002, audioCtx.currentTime);
+        limiter.release.setValueAtTime(0.12, audioCtx.currentTime);
+
+        // Ganancia limpia (+7.6 dB = ~2.4x el volumen)
+        boostGain = audioCtx.createGain();
+        boostGain.gain.setValueAtTime(2.4, audioCtx.currentTime);
+
+        source.connect(boostGain);
+        boostGain.connect(limiter);
+        limiter.connect(audioCtx.destination);
+        boostPipelineReady = true;
+      } catch (e) {
+        console.log('DSP no disponible:', e);
+      }
+    }
+
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -808,24 +847,52 @@
       if (!station) return;
 
       currentStation = station;
-      audio.src = station.url;
-      audio.load();
-
       updateSelectedStationUI(station);
 
       if (typeof Android !== 'undefined' && typeof Android.changeStation === 'function') {
         Android.changeStation(station.url, station.name);
       }
 
+      fallbackAudio.pause();
+      fallbackAudio.src = '';
+
+      initAudioDSP();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      audio.src = station.url;
+      audio.load();
+
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
           setPlayingState(true);
-        }).catch(() => {
-          setPlayingState(false);
+        }).catch((err) => {
+          console.log('Iniciando respaldo directo:', err);
+          playFallback(station.url);
         });
       }
     }
+
+    function playFallback(url) {
+      audio.pause();
+      audio.src = '';
+      fallbackAudio.src = url;
+      fallbackAudio.load();
+      fallbackAudio.play().then(() => setPlayingState(true)).catch(() => setPlayingState(false));
+    }
+
+    audio.addEventListener('error', () => {
+      if (currentStation && audio.src) {
+        playFallback(currentStation.url);
+      }
+    });
+
+    fallbackAudio.addEventListener('play', () => setPlayingState(true));
+    fallbackAudio.addEventListener('pause', () => {
+      if (!audio.src || audio.paused) setPlayingState(false);
+    });
 
     function selectStation(stationId) {
       const station = STATIONS[stationId];
@@ -842,12 +909,14 @@
         return;
       }
 
-      if (audio.paused) {
-        playStation(currentStation);
-      } else {
+      const isCurrentPaused = (audio.src && !audio.paused) || (fallbackAudio.src && !fallbackAudio.paused);
+      if (isCurrentPaused) {
         audio.pause();
+        fallbackAudio.pause();
         callAndroid('stopPlayback');
         setPlayingState(false);
+      } else {
+        playStation(currentStation);
       }
     }
 
