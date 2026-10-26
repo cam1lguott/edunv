@@ -714,6 +714,48 @@
     };
 
     const audio = document.getElementById('radioAudio');
+    audio.crossOrigin = 'anonymous';
+
+    // Web Audio API: DSP Booster con Ganancia + Limitador Anti-Clipping
+    let audioCtx = null;
+    let gainNode = null;
+    let compressorNode = null;
+    let audioSource = null;
+
+    function initWebAudioBoost() {
+      if (audioCtx) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return;
+      }
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        audioCtx = new AudioContextClass();
+        audioSource = audioCtx.createMediaElementSource(audio);
+
+        // Limitador Dinámico (DynamicsCompressor) para evitar distorsión/clipping
+        compressorNode = audioCtx.createDynamicsCompressor();
+        compressorNode.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
+        compressorNode.knee.setValueAtTime(2.0, audioCtx.currentTime);
+        compressorNode.ratio.setValueAtTime(12.0, audioCtx.currentTime);
+        compressorNode.attack.setValueAtTime(0.002, audioCtx.currentTime);
+        compressorNode.release.setValueAtTime(0.15, audioCtx.currentTime);
+
+        // Ganancia doble (+6.5 dB -> multiplicador 2.1x)
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(2.1, audioCtx.currentTime);
+
+        // Conectar: Audio -> Ganancia (+doble volumen) -> Limitador -> Altavoces
+        audioSource.connect(gainNode);
+        gainNode.connect(compressorNode);
+        compressorNode.connect(audioCtx.destination);
+      } catch (e) {
+        console.log('Web Audio Boost init error:', e);
+      }
+    }
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -808,6 +850,7 @@
 
       currentStation = station;
       audio.src = station.url;
+      initWebAudioBoost();
       audio.load();
 
       updateSelectedStationUI(station);
