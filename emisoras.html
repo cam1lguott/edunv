@@ -714,6 +714,34 @@
     };
 
     const audio = document.getElementById('radioAudio');
+    audio.crossOrigin = 'anonymous';
+
+    let audioCtx = null;
+    let gainNode = null;
+
+    function initCleanGain() {
+      if (audioCtx) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return;
+      }
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        audioCtx = new AudioCtx();
+        const source = audioCtx.createMediaElementSource(audio);
+
+        gainNode = audioCtx.createGain();
+        // Ganancia limpia calibrada: +3 dB (1.42x de amplitud real, ~30-40% más volumen sin romper el techo digital)
+        gainNode.gain.setValueAtTime(1.42, audioCtx.currentTime);
+
+        source.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+      } catch (e) {
+        console.log('Gain init error:', e);
+      }
+    }
 
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
@@ -808,6 +836,7 @@
       if (!station) return;
 
       currentStation = station;
+      initCleanGain();
       audio.src = station.url;
       audio.load();
 
@@ -817,6 +846,9 @@
         Android.changeStation(station.url, station.name);
       }
 
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
