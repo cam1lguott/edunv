@@ -722,6 +722,40 @@
     let currentStation = null;
     let isPlaying = false;
 
+    // Web Audio API para amplificación limpia (Doble de volumen con compresor y limitador)
+    let audioCtx = null;
+    let sourceNode = null;
+    let gainNode = null;
+    let compressorNode = null;
+
+    function initAudioBooster() {
+      if (audioCtx) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        audioCtx = new AudioContext();
+        sourceNode = audioCtx.createMediaElementSource(audio);
+
+        // Ganancia duplicada (+6.5 dB)
+        gainNode = audioCtx.createGain();
+        gainNode.gain.value = 2.15;
+
+        // Compresor/Limitador Anti-Clipping (evita distorsión/saturación)
+        compressorNode = audioCtx.createDynamicsCompressor();
+        compressorNode.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
+        compressorNode.knee.setValueAtTime(3.0, audioCtx.currentTime);
+        compressorNode.ratio.setValueAtTime(12.0, audioCtx.currentTime);
+        compressorNode.attack.setValueAtTime(0.003, audioCtx.currentTime);
+        compressorNode.release.setValueAtTime(0.15, audioCtx.currentTime);
+
+        sourceNode.connect(gainNode);
+        gainNode.connect(compressorNode);
+        compressorNode.connect(audioCtx.destination);
+      } catch (err) {
+        console.log('Web Audio no disponible:', err);
+      }
+    }
+
     const playSvg = '<path d="M8 5v14l11-7z"></path>';
     const pauseSvg = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>';
 
@@ -805,6 +839,12 @@
 
     function playStation(station) {
       if (!station) return;
+      try {
+        initAudioBooster();
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch(e) {}
 
       currentStation = station;
       audio.src = station.url;
