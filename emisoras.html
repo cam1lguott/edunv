@@ -714,114 +714,7 @@
     };
 
     const audio = document.getElementById('radioAudio');
-    audio.crossOrigin = 'anonymous';
 
-    // Motor DSP Multibanda estilo Android DynamicsProcessing
-    let audioCtx = null;
-    let isDspReady = false;
-
-    function initHifiDsp() {
-      if (isDspReady) {
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        return;
-      }
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        audioCtx = new AudioCtx();
-
-        const source = audioCtx.createMediaElementSource(audio);
-
-        // Crossover 3 Bandas (Filtros Linkwitz-Riley de 2º orden)
-        // Banda 1: Bajos (20Hz - 250Hz)
-        const lowFilter = audioCtx.createBiquadFilter();
-        lowFilter.type = 'lowpass';
-        lowFilter.frequency.setValueAtTime(250, audioCtx.currentTime);
-
-        const lowComp = audioCtx.createDynamicsCompressor();
-        lowComp.threshold.setValueAtTime(-18, audioCtx.currentTime);
-        lowComp.knee.setValueAtTime(10, audioCtx.currentTime);
-        lowComp.ratio.setValueAtTime(4, audioCtx.currentTime);
-        lowComp.attack.setValueAtTime(0.015, audioCtx.currentTime);
-        lowComp.release.setValueAtTime(0.20, audioCtx.currentTime);
-
-        const lowGain = audioCtx.createGain();
-        lowGain.gain.setValueAtTime(1.85, audioCtx.currentTime); // +5.3 dB en graves limpios
-
-        // Banda 2: Medios / Voces (250Hz - 3800Hz)
-        const midFilterHighPass = audioCtx.createBiquadFilter();
-        midFilterHighPass.type = 'highpass';
-        midFilterHighPass.frequency.setValueAtTime(250, audioCtx.currentTime);
-
-        const midFilterLowPass = audioCtx.createBiquadFilter();
-        midFilterLowPass.type = 'lowpass';
-        midFilterLowPass.frequency.setValueAtTime(3800, audioCtx.currentTime);
-
-        const midComp = audioCtx.createDynamicsCompressor();
-        midComp.threshold.setValueAtTime(-20, audioCtx.currentTime);
-        midComp.knee.setValueAtTime(12, audioCtx.currentTime);
-        midComp.ratio.setValueAtTime(3.5, audioCtx.currentTime);
-        midComp.attack.setValueAtTime(0.008, audioCtx.currentTime);
-        midComp.release.setValueAtTime(0.15, audioCtx.currentTime);
-
-        const midGain = audioCtx.createGain();
-        midGain.gain.setValueAtTime(2.1, audioCtx.currentTime); // +6.4 dB en presencia vocal
-
-        // Banda 3: Agudos / Claridad y Brillo (3800Hz - 20000Hz)
-        const highFilter = audioCtx.createBiquadFilter();
-        highFilter.type = 'highpass';
-        highFilter.frequency.setValueAtTime(3800, audioCtx.currentTime);
-
-        const highComp = audioCtx.createDynamicsCompressor();
-        highComp.threshold.setValueAtTime(-15, audioCtx.currentTime);
-        highComp.knee.setValueAtTime(8, audioCtx.currentTime);
-        highComp.ratio.setValueAtTime(3, audioCtx.currentTime);
-        highComp.attack.setValueAtTime(0.003, audioCtx.currentTime);
-        highComp.release.setValueAtTime(0.10, audioCtx.currentTime);
-
-        const highGain = audioCtx.createGain();
-        highGain.gain.setValueAtTime(1.6, audioCtx.currentTime); // +4.1 dB en brillo
-
-        // Sumador estéreo de las 3 bandas procesadas
-        const bandMerger = audioCtx.createGain();
-
-        // Conectar Banda Bajos
-        source.connect(lowFilter);
-        lowFilter.connect(lowComp);
-        lowComp.connect(lowGain);
-        lowGain.connect(bandMerger);
-
-        // Conectar Banda Medios
-        source.connect(midFilterHighPass);
-        midFilterHighPass.connect(midFilterLowPass);
-        midFilterLowPass.connect(midComp);
-        midComp.connect(midGain);
-        midGain.connect(bandMerger);
-
-        // Conectar Banda Agudos
-        source.connect(highFilter);
-        highFilter.connect(highComp);
-        highComp.connect(highGain);
-        highGain.connect(bandMerger);
-
-        // Master Limiter con techo suave en -0.5 dBFS (Anti-distorsión final)
-        const masterLimiter = audioCtx.createDynamicsCompressor();
-        masterLimiter.threshold.setValueAtTime(-0.5, audioCtx.currentTime);
-        masterLimiter.knee.setValueAtTime(0, audioCtx.currentTime);
-        masterLimiter.ratio.setValueAtTime(20, audioCtx.currentTime);
-        masterLimiter.attack.setValueAtTime(0.001, audioCtx.currentTime);
-        masterLimiter.release.setValueAtTime(0.05, audioCtx.currentTime);
-
-        bandMerger.connect(masterLimiter);
-        masterLimiter.connect(audioCtx.destination);
-
-        isDspReady = true;
-      } catch (err) {
-        console.log('DSP init error:', err);
-      }
-    }
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -915,7 +808,6 @@
       if (!station) return;
 
       currentStation = station;
-      initHifiDsp();
       audio.src = station.url;
       audio.load();
 
@@ -925,9 +817,6 @@
         Android.changeStation(station.url, station.name);
       }
 
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
