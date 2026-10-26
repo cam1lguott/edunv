@@ -750,7 +750,7 @@
 
         // Pre-Gain Potente (+7.4 dB / 2.35x de amplificación)
         gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(2.35, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(3.6, audioCtx.currentTime);
 
         // Compresor de Broadcast (Estilo radio FM profesional)
         compressorNode = audioCtx.createDynamicsCompressor();
@@ -762,7 +762,7 @@
 
         // Post-Gain para empuje final nítido (1.15x)
         const postGain = audioCtx.createGain();
-        postGain.gain.setValueAtTime(1.15, audioCtx.currentTime);
+        postGain.gain.setValueAtTime(1.35, audioCtx.currentTime);
 
         // Cadena: Audio -> PreGain -> Compresor -> Tanh Limiter -> PostGain -> Salida
         audioSource.connect(gainNode);
@@ -867,8 +867,8 @@
       if (!station) return;
 
       currentStation = station;
-      audio.src = station.url;
       initWebAudioBoost();
+      audio.src = station.url;
       audio.load();
 
       updateSelectedStationUI(station);
@@ -877,6 +877,9 @@
         Android.changeStation(station.url, station.name);
       }
 
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
