@@ -715,6 +715,50 @@
 
     const audio = document.getElementById('radioAudio');
 
+    let audioCtx = null;
+    let boostGain = null;
+    let limiter = null;
+    let audioSourceConnected = false;
+
+    function initMaxCleanAudio() {
+      if (audioCtx) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return;
+      }
+      try {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtxClass) return;
+        audioCtx = new AudioCtxClass();
+
+        if (!audioSourceConnected) {
+          const source = audioCtx.createMediaElementSource(audio);
+
+          // 1. Pre-amplificación fuerte (+9.5 dB = ~3.0x de volumen)
+          boostGain = audioCtx.createGain();
+          boostGain.gain.setValueAtTime(3.0, audioCtx.currentTime);
+
+          // 2. Limitador Brickwall rápido para cortar picos y evitar el 100% de la saturación
+          limiter = audioCtx.createDynamicsCompressor();
+          limiter.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
+          limiter.knee.setValueAtTime(4.0, audioCtx.currentTime);
+          limiter.ratio.setValueAtTime(20.0, audioCtx.currentTime); // ratio máximo de protección
+          limiter.attack.setValueAtTime(0.001, audioCtx.currentTime); // 1ms
+          limiter.release.setValueAtTime(0.10, audioCtx.currentTime);
+
+          // Conexión en serie protegida
+          source.connect(boostGain);
+          boostGain.connect(limiter);
+          limiter.connect(audioCtx.destination);
+
+          audioSourceConnected = true;
+        }
+      } catch (e) {
+        console.log('Audio DSP error:', e);
+      }
+    }
+
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -808,6 +852,7 @@
       if (!station) return;
 
       currentStation = station;
+      initMaxCleanAudio();
       audio.src = station.url;
       audio.load();
 
