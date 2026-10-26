@@ -736,31 +736,40 @@
         audioCtx = new AudioContextClass();
         audioSource = audioCtx.createMediaElementSource(audio);
 
-        // Etapa 1: Compresor Dinámico (empareja armónicos y eleva frecuencias medias/voces)
-        const mainCompressor = audioCtx.createDynamicsCompressor();
-        mainCompressor.threshold.setValueAtTime(-16.0, audioCtx.currentTime);
-        mainCompressor.knee.setValueAtTime(6.0, audioCtx.currentTime);
-        mainCompressor.ratio.setValueAtTime(4.0, audioCtx.currentTime);
-        mainCompressor.attack.setValueAtTime(0.005, audioCtx.currentTime);
-        mainCompressor.release.setValueAtTime(0.10, audioCtx.currentTime);
+        // Curva sigmoide suave de Soft-Clipping (simula saturación de cinta/tubos analógicos, eliminando distorsión digital)
+        function makeSoftCurve(amount) {
+          const k = typeof amount === 'number' ? amount : 2;
+          const n_samples = 44100;
+          const curve = new Float32Array(n_samples);
+          const deg = Math.PI / 180;
+          for (let i = 0; i < n_samples; ++i) {
+            let x = (i * 2) / n_samples - 1;
+            curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x * 20 * deg));
+          }
+          return curve;
+        }
 
-        // Etapa 2: Pre-amplificador de alta potencia (3.2x de ganancia / +10.1 dB)
+        const softClipper = audioCtx.createWaveShaper();
+        softClipper.curve = makeSoftCurve(0.5);
+        softClipper.oversample = '4x'; // Antialiasing de alta calidad
+
+        // Preamplificador limpio calibrado a 1.65x (+4.3 dB)
         gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(3.2, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(1.65, audioCtx.currentTime);
 
-        // Etapa 3: Limitador Brickwall estricto (corta a -0.3 dBFS para cero saturación/cero clipping)
+        // Compresor transparente de transmisión
         compressorNode = audioCtx.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-0.3, audioCtx.currentTime);
-        compressorNode.knee.setValueAtTime(0.0, audioCtx.currentTime);
-        compressorNode.ratio.setValueAtTime(20.0, audioCtx.currentTime);
-        compressorNode.attack.setValueAtTime(0.001, audioCtx.currentTime);
-        compressorNode.release.setValueAtTime(0.08, audioCtx.currentTime);
+        compressorNode.threshold.setValueAtTime(-5.0, audioCtx.currentTime);
+        compressorNode.knee.setValueAtTime(12.0, audioCtx.currentTime);
+        compressorNode.ratio.setValueAtTime(3.5, audioCtx.currentTime);
+        compressorNode.attack.setValueAtTime(0.008, audioCtx.currentTime);
+        compressorNode.release.setValueAtTime(0.20, audioCtx.currentTime);
 
-        // Cadena de audio: Audio -> Compresor Musical -> Ganancia Ultra -> Limitador de Techo -> Altavoces
-        audioSource.connect(mainCompressor);
-        mainCompressor.connect(gainNode);
+        // Cadena Hi-Fi: Fuente -> Gain Limpio -> Compresor Transparente -> Soft Clipper Analógico -> Destino
+        audioSource.connect(gainNode);
         gainNode.connect(compressorNode);
-        compressorNode.connect(audioCtx.destination);
+        compressorNode.connect(softClipper);
+        softClipper.connect(audioCtx.destination);
       } catch (e) {
         console.log('Web Audio Boost init error:', e);
       }
