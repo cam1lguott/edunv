@@ -715,49 +715,6 @@
 
     const audio = document.getElementById('radioAudio');
 
-    let audioCtx = null;
-    let boostGain = null;
-    let limiter = null;
-    let audioSourceNode = null;
-    let isWebAudioEnabled = false;
-
-    function setupWebAudioPipeline() {
-      if (window.Android && typeof window.Android.changeStation === 'function') {
-        // En la app Android, el AudioService nativo ya aplica DynamicsProcessing sin CORS
-        return;
-      }
-      if (isWebAudioEnabled) {
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        return;
-      }
-      try {
-        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtxClass) return;
-        audioCtx = new AudioCtxClass();
-        
-        audioSourceNode = audioCtx.createMediaElementSource(audio);
-
-        // Limitador de seguridad anti-saturación
-        limiter = audioCtx.createDynamicsCompressor();
-        limiter.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
-        limiter.knee.setValueAtTime(4.0, audioCtx.currentTime);
-        limiter.ratio.setValueAtTime(16.0, audioCtx.currentTime);
-        limiter.attack.setValueAtTime(0.002, audioCtx.currentTime);
-        limiter.release.setValueAtTime(0.12, audioCtx.currentTime);
-
-        // Ganancia reforzada (+6.5 dB = 2.1x)
-        boostGain = audioCtx.createGain();
-        boostGain.gain.setValueAtTime(2.1, audioCtx.currentTime);
-
-        audioSourceNode.connect(boostGain);
-        boostGain.connect(limiter);
-        limiter.connect(audioCtx.destination);
-        isWebAudioEnabled = true;
-      } catch (err) {
-        console.log('Web Audio pipeline no disponible, usando audio directo:', err);
-      }
-    }
-
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -851,41 +808,21 @@
       if (!station) return;
 
       currentStation = station;
-      updateSelectedStationUI(station);
-
-      // Si se ejecuta en la App APK (Android / TV)
-      if (typeof Android !== 'undefined' && typeof Android.changeStation === 'function') {
-        Android.changeStation(station.url, station.name);
-        setPlayingState(true);
-        return;
-      }
-
-      // Si se ejecuta en navegador Web
-      try {
-        setupWebAudioPipeline();
-      } catch (e) {}
-
       audio.src = station.url;
       audio.load();
 
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
+      updateSelectedStationUI(station);
+
+      if (typeof Android !== 'undefined' && typeof Android.changeStation === 'function') {
+        Android.changeStation(station.url, station.name);
       }
 
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === 'function') {
         playPromise.then(() => {
           setPlayingState(true);
-        }).catch((err) => {
-          console.log('Error al reproducir audio web:', err);
-          // Fallback seguro anti-silencio: desconectar pipeline si hubo bloqueo CORS
-          if (audioSourceNode && isWebAudioEnabled) {
-            try {
-              audioSourceNode.disconnect();
-              audioSourceNode.connect(audioCtx.destination);
-            } catch(ex) {}
-          }
-          audio.play().then(() => setPlayingState(true)).catch(() => setPlayingState(false));
+        }).catch(() => {
+          setPlayingState(false);
         });
       }
     }
