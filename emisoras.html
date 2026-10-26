@@ -715,43 +715,6 @@
 
     const audio = document.getElementById('radioAudio');
 
-    let audioCtx = null;
-    let boostGain = null;
-    let limiter = null;
-    let isConnected = false;
-
-    function applyAudioEnhancer() {
-      if (isConnected) return;
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        
-        audioCtx = new AudioContextClass();
-        const source = audioCtx.createMediaElementSource(audio);
-
-        // Limitador de seguridad para evitar cualquier saturación
-        limiter = audioCtx.createDynamicsCompressor();
-        limiter.threshold.setValueAtTime(-1.0, audioCtx.currentTime);
-        limiter.knee.setValueAtTime(4.0, audioCtx.currentTime);
-        limiter.ratio.setValueAtTime(20.0, audioCtx.currentTime);
-        limiter.attack.setValueAtTime(0.001, audioCtx.currentTime);
-        limiter.release.setValueAtTime(0.10, audioCtx.currentTime);
-
-        // Pre-amplificación limpia (+7.5 dB = ~2.4x)
-        boostGain = audioCtx.createGain();
-        boostGain.gain.setValueAtTime(2.4, audioCtx.currentTime);
-
-        source.connect(boostGain);
-        boostGain.connect(limiter);
-        limiter.connect(audioCtx.destination);
-        isConnected = true;
-      } catch (e) {
-        // En caso de que el navegador tenga restricción estricta de origen cruzado,
-        // el tag <audio> seguirá sonando directamente por sus altavoces de forma normal.
-        console.log('Modo de audio estándar activo');
-      }
-    }
-
     const bottomBar = document.getElementById('bottomBar');
     const fullPlayer = document.getElementById('fullPlayer');
     const playIcon = document.getElementById('playIcon');
@@ -845,10 +808,6 @@
       if (!station) return;
 
       currentStation = station;
-      applyAudioEnhancer();
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
       audio.src = station.url;
       audio.load();
 
