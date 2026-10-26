@@ -736,40 +736,24 @@
         audioCtx = new AudioContextClass();
         audioSource = audioCtx.createMediaElementSource(audio);
 
-        // Curva sigmoide asimétrica suave (Soft-Knee Tanh) para absorción natural de picos
-        const n_samples = 44100;
-        const curve = new Float32Array(n_samples);
-        for (let i = 0; i < n_samples; ++i) {
-          let x = (i * 2) / n_samples - 1;
-          curve[i] = Math.tanh(x);
-        }
-
-        const waveShaper = audioCtx.createWaveShaper();
-        waveShaper.curve = curve;
-        waveShaper.oversample = '4x';
-
-        // Pre-Gain Potente (+7.4 dB / 2.35x de amplificación)
-        gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(3.6, audioCtx.currentTime);
-
-        // Compresor de Broadcast (Estilo radio FM profesional)
+        // Compresor Dinámico Puro (Exactamente como el DRC / DynamicsProcessing de la APK)
+        // threshold a -24 dB para atrapar toda la señal y levantar el rango dinámico de fondo
         compressorNode = audioCtx.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-10.0, audioCtx.currentTime);
-        compressorNode.knee.setValueAtTime(8.0, audioCtx.currentTime);
-        compressorNode.ratio.setValueAtTime(6.0, audioCtx.currentTime);
+        compressorNode.threshold.setValueAtTime(-24.0, audioCtx.currentTime);
+        compressorNode.knee.setValueAtTime(30.0, audioCtx.currentTime); // Rodilla ultra suave sin distorsión
+        compressorNode.ratio.setValueAtTime(12.0, audioCtx.currentTime);
         compressorNode.attack.setValueAtTime(0.003, audioCtx.currentTime);
-        compressorNode.release.setValueAtTime(0.12, audioCtx.currentTime);
+        compressorNode.release.setValueAtTime(0.25, audioCtx.currentTime);
 
-        // Post-Gain para empuje final nítido (1.15x)
-        const postGain = audioCtx.createGain();
-        postGain.gain.setValueAtTime(1.35, audioCtx.currentTime);
+        // Ganancia de maquillaje calibrada al doble (+6.0 dB / 2.0x) colocada DESPUÉS del compresor
+        // Al estar después, levanta el volumen general sin saturar la entrada
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(1.95, audioCtx.currentTime);
 
-        // Cadena: Audio -> PreGain -> Compresor -> Tanh Limiter -> PostGain -> Salida
-        audioSource.connect(gainNode);
-        gainNode.connect(compressorNode);
-        compressorNode.connect(waveShaper);
-        waveShaper.connect(postGain);
-        postGain.connect(audioCtx.destination);
+        // Cadena limpia: Audio -> Compresor (control de picos) -> Ganancia (+doble volumen) -> Altavoces
+        audioSource.connect(compressorNode);
+        compressorNode.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
       } catch (e) {
         console.log('Web Audio Boost error:', e);
       }
